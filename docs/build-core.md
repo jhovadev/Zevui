@@ -2,8 +2,9 @@
 
 **Scope:** a reusable `addApp` Zig build function, a typed `.zon` file, typed
 platform overrides, build-time app options, and a second independent GUI app.
-This is still a **local build module** inside the template, not yet a separately
-published `zevui` Zig dependency. There is no Zevui CLI or runtime plugin loader.
+The build core is now a **separate Zig package** in `framework/` consumed
+through a local `.path` dependency. It has not been published at a stable
+remote URL/hash; see [F3](architecture/f3-sdk-extraction.md). There is no Zevui CLI or runtime plugin loader.
 
 ## Application files
 
@@ -12,15 +13,15 @@ build.zig                 thin orchestration of two applications
 zevui.zon                 CSV Explorer defaults: title, ID, appearance
 zevui.windows.zon         typed optional Windows window/title overrides
 zevui.macos.zon           typed optional macOS overrides
-zevui/config.zig          schema, validation and merge behavior (pure Zig)
-zevui/build.zig           addApp, b.addOptions, DVUI wiring, Windows GUI
-src/app/identity.zig      runtime shim over @import("zevui_config")
+framework/src/config.zig          schema, validation and merge behavior (pure Zig)
+framework/build.zig           addApp, b.addOptions, DVUI wiring, Windows GUI
+examples/csv-explorer/src/app/identity.zig      runtime shim over @import("zevui_config")
 examples/minimal/         independent DVUI application; no ZData import
-examples/csv/build.zig    headless tests and CSV benchmark only
+examples/csv-explorer/build.zig    headless tests and CSV benchmark only
 ```
 
 The source of truth for app identity and default window dimensions is
-`zevui.zon`. `src/app/identity.zig` is the view adapter for the CSV example;
+`zevui.zon`. `examples/csv-explorer/src/app/identity.zig` is the view adapter for the CSV example;
 **do not edit it when rebranding**. The names and sizes are injected through
 `std.Build.Step.Options`, so app code never imports a ZON outside its module
 root (the same problem addressed by M0.4.1 for embedded icons).
@@ -29,7 +30,7 @@ root (the same problem addressed by M0.4.1 for embedded icons).
 
 ```zig
 const std = @import("std");
-const zevui = @import("zevui/build.zig");
+const zevui = @import("framework/build.zig");
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
@@ -38,14 +39,16 @@ pub fn build(b: *std.Build) void {
     _ = zevui.addApp(b, config, .{
         .target = target,
         .optimize = optimize,
-        .root_source_file = "src/main.zig",
+        .root_source_file = "examples/csv-explorer/src/main.zig",
     });
 }
 ```
 
-This sample uses a **local file import**. The proposed
-`const zevui = @import("zevui")` form is reserved for a future independently
-packaged Zevui build API, once Zig 0.17.1 package-import tests pass. No custom
+This sample uses a **local build helper import**. The public runtime UI kit
+is obtained via the local Zig package dependency `b.dependency("zevui", ...)`
+and `sdk_dep.module("zevui")`; the consumer injects its pinned DVUI module to
+avoid duplicate type identities. External package consumption remains a
+required F5 compatibility test. No custom
 CLI is required for either form: `zig build` is the source of truth.
 
 `addApp` attaches `dvui_sdl3`, adds the `zevui_config` options module, and
@@ -54,7 +57,8 @@ example imports ZData. The smaller app declares `.zdata = false` and can be
 compiled with `zig build minimal -Doptimize=ReleaseSafe`. Since both examples
 currently share one workspace build graph, the **workspace manifest still
 requires ZData for the CSV application**, even when only `minimal` is built.
-Extraction into a separately installable Zevui package is the next gate.
+Remote publication and independent-package consumption are F4/F5 gates;
+the F3 `framework/` package is locally importable and independently testable.
 
 The helper also exposes the existing portable GUI profile, keeps Windows GUI
 subsystem behavior and supports a debug-console opt-in. Windows resource

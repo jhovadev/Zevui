@@ -1,7 +1,7 @@
 # Architectural boundary: UI, formats and SDK
 
 ```text
-DVUI + SDL3 (src/main.zig)
+DVUI + SDL3 (examples/csv-explorer/src/main.zig)
     ├── search.zig           filters / numeric mergesort / UI budgets
     └── csv.zig              CSV rules, errors, decoded fields
           ├── zdata.scan.structural.Scanner  (structural marks outside quotes)
@@ -36,8 +36,8 @@ const zdata_module = zdata_dep.module("zdata");
 
 It is pinned into `build.zig.zon` with `just setup`. Updating the ZData revision
 changes the package manifest: review that diff and rerun tests before merging.
-The `test-compile` step in `build.zig` compiles `src/csv.zig` and
-`src/search.zig` tests without executing foreign-architecture code.
+The `test-compile` step in `build.zig` compiles `examples/csv-explorer/src/csv.zig` and
+`examples/csv-explorer/src/search.zig` tests without executing foreign-architecture code.
 
 For a runtime GUI demonstration use `just run`; for cross targets see the
 [cross-compilation guide](cross-compilation.md). Build recipes are intentionally
@@ -45,10 +45,10 @@ separated from verification and release promises.
 
 ## UI layer (M0.2)
 
-`src/ui/tokens.zig` is independent from both ZData and DVUI: tokens, WCAG
-contrast checks, appearance and density. `src/ui/hooks.zig` provides explicit
-state handles with no React-style lifecycle. `src/ui/dvui_style.zig` converts
-tokens to DVUI and `src/ui/components.zig` centralizes widget variants while
+`framework/src/ui/tokens.zig` is independent from both ZData and DVUI: tokens, WCAG
+contrast checks, appearance and density. `framework/src/ui/hooks.zig` provides explicit
+state handles with no React-style lifecycle. `framework/src/ui/dvui_style.zig` converts
+tokens to DVUI and `framework/src/ui/components.zig` centralizes widget variants while
 preserving the call-site `@src()` widget ID. See [design-system.md](design-system.md).
 
 Portable cross builds disable optional native dialogs; the app keeps a path

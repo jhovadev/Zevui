@@ -72,8 +72,8 @@ def contents(data: dict) -> dict[str, bytes]:
     addons = set(p['addons'])
     files = {}
     for path in ('zevui/build.zig', 'zevui/config.zig'):
-        files[path] = (ROOT / path).read_bytes()
-    files['src/main.zig'] = (ROOT / 'examples/minimal/main.zig').read_bytes()
+        files[path] = (ROOT / 'templates/compat' / path).read_bytes()
+    files['src/main.zig'] = (ROOT / 'templates/compat/minimal/main.zig').read_bytes()
     addon_test_entries = ''.join(', "src/addons/%s.zig"' % addon for addon in sorted(addons))
     files['build.zig'] = '''const std = @import("std");
 const zevui = @import("zevui/build.zig");

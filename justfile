@@ -41,7 +41,7 @@ set positional-arguments := true
 
 # Format Zig sources. Changes files, so review git diff afterward.
 @fmt:
-    zig fmt build.zig zevui src examples
+    zig fmt build.zig framework examples
 
 # Compile the native SDL3 app into zig-out/bin.
 @build:
@@ -118,6 +118,14 @@ set positional-arguments := true
 # Run the independent DVUI-only example (requires a graphical desktop).
 @run-minimal:
     zig build minimal-run -Doptimize=ReleaseFast
+
+# Wire the local SDK without rewriting any previously pinned ZData/DVUI hashes.
+@f3-wire:
+    python3 tools/f3_wire_manifest.py
+
+# Test the standalone Zevui SDK package independently of CSV/ZData.
+@framework-check:
+    cd framework && zig build test -Doptimize=ReleaseSafe
 
 # Install Initializr frontend dependencies (Node 24+, Bun).
 @initializr-setup:

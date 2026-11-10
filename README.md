@@ -1,10 +1,10 @@
 # Zevui
 
-**A native Zig desktop starter using [DVUI](https://github.com/david-vanderson/dvui), [SDL3](https://www.libsdl.org/), and [Zig Data Engine (ZData)](https://github.com/jhovadev/zigdataengine).**
+**An experimental native Zig SDK and desktop starter using [DVUI](https://github.com/david-vanderson/dvui), [SDL3](https://www.libsdl.org/), and [Zig Data Engine (ZData)](https://github.com/jhovadev/zigdataengine).**
 
-Zevui is an **unofficial, example-driven template**, not a replacement for DVUI or a component of ZData. Its first application, **CSV Explorer**, is a small but usable data viewer: a compact grid, on-demand search, column tools, and a multi-theme design system.
+Zevui is an **independent community SDK and example-driven template**, not a replacement for DVUI or a component of ZData. Its first application, **CSV Explorer**, is a small but usable data viewer: a compact grid, on-demand search, column tools, and a multi-theme design system.
 
-> **Status:** F2 single TypeScript generator (after Z0/F1) · **Zig 0.17.1** · native desktop UI · MIT. Linux x86-64 has been exercised by the project author; other cross-build targets need target-host validation. Names and APIs are subject to change.
+> **Status:** F3 SDK extraction (after F2/Z0/F1) · **Zig 0.17.1** · native desktop UI · MIT. Linux x86-64 has been exercised by the project author; other cross-build targets need target-host validation. Names and APIs are subject to change.
 
 ## Zevui Initializr — generate your own Zig app
 
@@ -46,7 +46,7 @@ and [Initializr documentation](docs/initializr.md).
 [F2 acceptance](docs/architecture/f2-generator.md),
 [target architecture](docs/architecture/target-architecture.md), and
 [F1–F6 roadmap](docs/architecture/migration-roadmap.md). The five ADRs remain
-proposed; physical extraction of `framework/` and `examples/csv-explorer/` is F3.
+proposed; F3 physically extracts `framework/` and `examples/csv-explorer/`, but SDK publication and pinned consumption remain pending F4/F5.
 
 ## Why this template?
 
@@ -72,6 +72,7 @@ Requirements: Zig **0.17.1**, `just`, and Python 3 for repository checks. On Arc
 ```sh
 cd zdata-dvui-examples
 just setup       # one-time: pin public ZData in build.zig.zon
+just f3-wire     # one-time: add local Zevui SDK without touching ZData pin
 just doctor      # inspect Zig, just and package wiring
 just check       # Python checks + Zig ReleaseSafe tests
 just run         # DVUI/SDL3 desktop application
@@ -97,8 +98,8 @@ search keeps the query active; use **Limpiar** to remove it. **Compacta** is the
 initial density, not a search button. The columns panel uses unique per-row
 DVUI widget IDs for reliable focus and event handling.
 
-The app is branded from `zevui.zon`; `src/app/identity.zig` now reads generated `zevui_config` build options. SVG source assets are in
-`src/ui/assets/` and `assets/branding/`. DVUI converts the toolbar SVGs to
+The app is branded from `zevui.zon`; `examples/csv-explorer/src/app/identity.zig` now reads generated `zevui_config` build options. SVG source assets are in
+`framework/src/ui/assets/` and `assets/branding/`. DVUI converts the toolbar SVGs to
 TinyVG at startup; it reads the bundled PNG for the window icon. The Windows
 resource embeds a multi-size `.ico` into the executable.
 
@@ -127,11 +128,11 @@ To test a larger personal CSV, run `zig build bench -Doptimize=ReleaseFast -- /p
 
 ```text
 Zevui (DVUI + SDL3)
-  src/main.zig           window, interactions, table & panels
-  src/ui/                design tokens, state handles, DVUI adapter
+  framework/src/ui/     reusable design tokens, state handles and DVUI adapters
              |
-  src/csv.zig            CSV/TSV-specific parser
-  src/search.zig         incremental filtering and sorting
+  examples/csv-explorer/src/main.zig   window, interactions, grid and panels
+  examples/csv-explorer/src/csv.zig    CSV/TSV-specific parser
+  examples/csv-explorer/src/search.zig incremental filtering and sorting
              |
   @import("zdata")      generic byte/bit/scan primitives
 ```
@@ -153,39 +154,44 @@ The portable profile disables **optional** native dialogs, FreeType and Tree-sit
 
 ## Theme and UI architecture
 
-The design system consists of pure [`src/ui/tokens.zig`](src/ui/tokens.zig) values, explicit state holders in [`src/ui/hooks.zig`](src/ui/hooks.zig), a DVUI color adapter, and semantic components. Themes and accents are independent of the data pipeline. Appearance is currently stored only for the running session.
+The design system consists of pure [`framework/src/ui/tokens.zig`](framework/src/ui/tokens.zig) values, explicit state holders in [`framework/src/ui/hooks.zig`](framework/src/ui/hooks.zig), a DVUI color adapter, and semantic components. Themes and accents are independent of the data pipeline. Appearance is currently stored only for the running session.
 
 For spacing, grid affordances and interaction conventions, see [UI guidelines](docs/ui-guidelines.md) and [design system](docs/design-system.md).
 
 ## Project map
 
 ```text
-zevui.zon         Application identity, dimensions and compile-time options
-zevui/*.zig        Reusable Zevui build helper and typed config
-examples/minimal/  Second DVUI app with no ZData import
-examples/csv/      CSV-only headless test and benchmark steps
-src/main.zig       CSV Explorer app and DVUI view
-src/csv.zig        Parser and ZData structural scan integration
-src/search.zig     Incremental operations
-src/ui/            Tokens / theme adapter / small components
-src/bench.zig      CSV benchmark
-justfile           Development and cross-build recipes
-scripts/           Dependency and SDK preflight checks
-tests/             Headless infrastructure checks
-testdata/          Synthetic non-sensitive CSV fixture
-docs/              Architecture, design, cross-platform, troubleshooting
+framework/                 Publishable Zig SDK package, build helper and UI kit
+  build.zig(.zon)          Standalone SDK, no ZData/CSV dependency
+  src/root.zig            Public @import("zevui") module
+  src/ui/                 Tokens, state handles, DVUI adapters and SVG icons
+  src/storage.zig         Storage capabilities (no backend implementation)
+examples/csv-explorer/     CSV application, tests and benchmarks
+examples/minimal/          Independent DVUI-only app, Zevui SDK consumer
+addons/                    Addon prototypes (F4 package extraction pending)
+registry/                  Official addon metadata
+packages/initializr-core/  TypeScript planner, renderer, ZIP executor
+apps/initializr/           SolidStart project generator website
+templates/compat/          Frozen F2 project sources until F5
+build.zig(.zon)            Workspace build; local framework path dependency
+zevui.zon                  App configuration and platform overrides
 ```
+
+See [F3 migration and acceptance gates](docs/architecture/f3-sdk-extraction.md)
+and the [standalone SDK README](framework/README.md).
 
 ## Build core — two independent applications
 
 M0.5 moves identity, window defaults and appearance defaults to the typed
 [`zevui.zon`](zevui.zon). `build.zig` invokes the reusable
-[`zevui.addApp()`](zevui/build.zig) for CSV Explorer **and**
+[`zevui.addApp()`](framework/build.zig) for CSV Explorer **and**
 [`examples/minimal`](examples/minimal), which does not import ZData.
 Typed Windows/macOS overrides are in `zevui.windows.zon` / `zevui.macos.zon`.
 A theme preference changed while the app runs is runtime state, **not** a build
-configuration change. The new helper is intentionally a *local build module*
-for M0.5; it is not yet a separately published Zevui package or CLI.
+configuration change. The helper is now also a standalone Zig package in `framework/`; the workspace
+consumes it via a **local `.path` dependency**. It is not yet a published
+URL/hash package. Initializr's F2 compatibility template will switch to a
+pinned SDK dependency in F5.
 
 ```sh
 just check     # headless tests; no display needed
@@ -219,9 +225,9 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for conventions. Please provide platfor
 ## Rebrand Zevui for your own app
 
 Change the title, organization, application identifier, version and dimensions
-in `src/app/identity.zig`. Replace `assets/branding/zevui.svg`, regenerate
-`src/app/assets/zevui.png` (window icon) and `assets/branding/zevui.ico` (Windows Explorer icon), and edit
-`src/ui/assets/*.svg` for toolbar icons. If you rename the executable, update
+in `zevui.zon` (the source of truth), not in the generated identity shim. Replace `assets/branding/zevui.svg`, regenerate
+`examples/csv-explorer/src/app/assets/zevui.png` (window icon) and `assets/branding/zevui.ico` (Windows Explorer icon), and edit
+`framework/src/ui/assets/*.svg` for toolbar icons. If you rename the executable, update
 the `windows-gui-check` recipe too.
 
 Windows GUI builds hide the extra console by selecting the PE **Windows GUI**

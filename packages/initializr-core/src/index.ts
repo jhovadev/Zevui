@@ -122,8 +122,8 @@ export function planProject(project: ProjectInput, catalog: Catalog): Plan {
     { kind: "render", path: "build.zig" }, { kind: "render", path: "build.zig.zon" },
     { kind: "render", path: "zevui.zon" }, { kind: "render", path: "README.md" },
     { kind: "render", path: ".gitignore" }, { kind: "render", path: "src/main.zig" },
-    { kind: "copy", path: "zevui/build.zig", source: "zevui/build.zig" },
-    { kind: "copy", path: "zevui/config.zig", source: "zevui/config.zig" },
+    { kind: "copy", path: "zevui/build.zig", source: "templates/compat/zevui/build.zig" },
+    { kind: "copy", path: "zevui/config.zig", source: "templates/compat/zevui/config.zig" },
   ];
   for (const id of ids) for (const file of addons.get(id)!.files)
     files.push({ kind: "copy", path: file.to, source: file.from });

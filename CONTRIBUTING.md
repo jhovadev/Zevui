@@ -1,7 +1,7 @@
 # Contributing to Zevui
 
-This is a small application that **consumes ZData** rather than a replacement
-for Zig Data Engine itself. Keep changes scoped to the appropriate project.
+Zevui is a modular SDK and example suite. CSV Explorer **consumes ZData**,
+while the framework itself remains independent of the data engine. Keep changes scoped to the appropriate project.
 
 ## Local workflow
 
@@ -16,15 +16,15 @@ for Zig Data Engine itself. Keep changes scoped to the appropriate project.
 
 ## Code boundaries
 
-- `zevui/config.zig`, `zevui/build.zig`: reusable typed build configuration and addon wiring.
+- `framework/src/config.zig`, `framework/build.zig`: standalone Zig SDK config and build API.
 - `zevui.zon`, `zevui.windows.zon`, `zevui.macos.zon`: application-specific build settings.
 - `examples/minimal`: second consumer with no dependency on ZData.
-- `examples/csv/build.zig`: CSV-only tests and benchmark setup.
+- `examples/csv-explorer/build.zig`: CSV-only tests and benchmark setup.
 
 
-- `src/csv.zig`: CSV-specific parsing, error rules and dialect interpretation.
-- `src/main.zig`: DVUI window/UI state; keep it independent of SDK internals.
-- `src/search.zig`: app-local search/filter/sort (until a general kernel exists).
+- `examples/csv-explorer/src/csv.zig`: CSV-specific parsing, error rules and dialect interpretation.
+- `examples/csv-explorer/src/main.zig`: DVUI window/UI state; keep it independent of SDK internals.
+- `examples/csv-explorer/src/search.zig`: app-local search/filter/sort (until a general kernel exists).
 - ZData: generic algorithms, allocation, stats and scan primitives only.
 
 Keep `build.zig.zon` pinned: review dependency updates deliberately. The main
@@ -57,5 +57,5 @@ of the **same PR** that moves or replaces a documented API. Preserve
 The production generator is TypeScript only. Changes to rendering require
 `just registry-check` and `just ecosystem-check`, plus the frozen oracle
 SHA-256 fixtures (`tests/fixtures/initializr-f2-golden.json`). Do not wire
-`tests/legacy_oracle/` into any API or CLI route. The next structural phase
-(F3) will extract the Zig framework package independently.
+`tests/legacy_oracle/` into any API or CLI route. F3 extracts the standalone SDK package. Run `just framework-check` before any publication.
+Generated-project compatibility sources remain frozen under `templates/compat/` until F5.

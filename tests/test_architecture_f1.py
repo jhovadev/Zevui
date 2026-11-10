@@ -26,7 +26,7 @@ class ArchitectureF1Tests(unittest.TestCase):
 
     def test_current_build_contracts_are_still_present(self):
         root_build = (ROOT / "build.zig").read_text()
-        helper = (ROOT / "zevui/build.zig").read_text()
+        helper = (ROOT / "framework/build.zig").read_text()
         self.assertIn("zevui.addApp(b, config", root_build)
         self.assertIn("zevui.addApp(b, minimal_config", root_build)
         self.assertIn('module.addImport("dvui"', helper)
@@ -62,8 +62,8 @@ class ArchitectureF1Tests(unittest.TestCase):
     def test_zdata_sdk_is_not_part_of_zevui_framework_source(self):
         # The root project can consume zdata; the *reusable* build helper
         # must not contain ZData algorithms or CSV parser source.
-        build_dir = ROOT / "zevui"
-        for source in build_dir.glob("*.zig"):
+        build_dir = ROOT / "framework"
+        for source in build_dir.rglob("*.zig"):
             code = source.read_text()
             self.assertNotIn("zdata.scan.", code)
             self.assertNotIn("zdata.bits.", code)

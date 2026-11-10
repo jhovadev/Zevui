@@ -2,12 +2,13 @@ const std = @import("std");
 const dvui = @import("dvui");
 const csv = @import("csv.zig");
 const search = @import("search.zig");
-const tokens = @import("ui/tokens.zig");
-const hooks = @import("ui/hooks.zig");
-const style = @import("ui/dvui_style.zig");
-const ui = @import("ui/components.zig");
+const kit = @import("zevui");
+const tokens = kit.ui.tokens;
+const hooks = kit.ui.hooks;
+const style = kit.ui.style;
+const ui = kit.ui.components;
 const brand = @import("app/identity.zig");
-const vector_icons = @import("ui/icons.zig");
+const vector_icons = kit.ui.icons;
 
 pub const dvui_app: dvui.App = .{
     .config = .{ .options = .{

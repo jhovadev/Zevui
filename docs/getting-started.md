@@ -96,7 +96,7 @@ See [architecture and testing](integration.md) and
 ## M0.5 — Configure Zevui applications
 
 Modify `zevui.zon` for application title, identifier, window size and default
-theme. `src/app/identity.zig` reads these values from generated build options.
+theme. `examples/csv-explorer/src/app/identity.zig` reads these values from generated build options.
 This file should not be edited for rebranding. Platform overrides can modify
 selected window dimensions via `zevui.windows.zon` and `zevui.macos.zon`.
 

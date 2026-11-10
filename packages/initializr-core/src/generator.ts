@@ -155,7 +155,7 @@ export function generateProject(input: ProjectInput, catalog: Catalog, sources: 
     "README.md": encoder.encode(renderReadme(plan, addon.docs)),
     ".gitignore": encoder.encode(".zig-cache/\nzig-out/\ndist/\n"),
     "src/main.zig": (() => {
-      const base = value(sources["examples/minimal/main.zig"], "examples/minimal/main.zig");
+      const base = value(sources["templates/compat/minimal/main.zig"], "templates/compat/minimal/main.zig");
       const suffix = encoder.encode(addon.source);
       const result = new Uint8Array(base.length + suffix.length);
       result.set(base); result.set(suffix, base.length);

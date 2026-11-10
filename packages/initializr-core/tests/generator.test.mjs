@@ -10,7 +10,7 @@ const read = (p) => readFileSync(new URL(p, root));
 const registry = JSON.parse(read('registry/catalog.json'));
 const golden = JSON.parse(read('tests/fixtures/initializr-f2-golden.json'));
 const sources = Object.fromEntries([
-  'examples/minimal/main.zig', 'zevui/build.zig', 'zevui/config.zig',
+  'templates/compat/minimal/main.zig', 'templates/compat/zevui/build.zig', 'templates/compat/zevui/config.zig',
   'addons/design_tokens.zig', 'addons/memory_store.zig',
 ].map(p => [p, read(p)]));
 

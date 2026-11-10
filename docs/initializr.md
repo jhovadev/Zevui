@@ -88,3 +88,8 @@ The DVUI SDL3 package dependency is inherited from the M0.5 manifest and cross-c
 ## Z0 registry and pure planner
 
 The registry is `registry/catalog.json` (schema v2). Its TypeScript planner and deterministic ZIP executor share a validated plan. Python survives only as a frozen test oracle. See [F2 architecture](architecture/f2-generator.md).
+
+**F3 migration:** production SDK sources now live in `framework/`; the
+Initializr deliberately reads unchanged F2 sources from `templates/compat/`
+to preserve golden ZIP bytes. A pinned external SDK package replaces those
+copies in F5, after registry and consumer build checks.

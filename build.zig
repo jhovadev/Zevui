@@ -1,7 +1,9 @@
 //! Single build entry: Zevui provides the reusable GUI build, CSV adds its tests.
 const std = @import("std");
-const zevui = @import("zevui/build.zig");
-const csv = @import("examples/csv/build.zig");
+// Build-time API comes from the declared .zevui package, not a file path.
+// Importing framework/build.zig by path duplicates its module ownership in Zig 0.17.1.
+const zevui = @import("zevui");
+const csv = @import("examples/csv-explorer/build.zig");
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
@@ -17,12 +19,22 @@ pub fn build(b: *std.Build) void {
         else => base,
     };
     const app = zevui.addApp(b, config, .{
-        .target = target, .optimize = optimize, .root_source_file = "src/main.zig",
+        .target = target, .optimize = optimize, .root_source_file = "examples/csv-explorer/src/main.zig",
         .portable_gui = portable, .windows_console = windows_console,
         .windows_resource = "assets/windows/zevui.rc",
         .windows_icon_directory = "assets/branding",
         .dvui_run_alias = true,
     });
+    // Public Zevui SDK module comes from a local path package in the monorepo.
+    // Swap .path for a pinned .url/.hash when the SDK is published (F4/F5).
+    const sdk_dep = b.dependency("zevui", .{ .target = target, .optimize = optimize });
+    const kit = sdk_dep.module("zevui");
+    // UI adapters must share the exact DVUI module used by the application.
+    const dvui_dep = b.dependency("dvui", .{
+        .target = target, .optimize = optimize, .backend = .sdl3,
+    });
+    kit.addImport("dvui", dvui_dep.module("dvui_sdl3"));
+    app.executable.root_module.addImport("zevui", kit);
     csv.addSteps(b, target, optimize, app.config_options);
 
     // Independent second app: no ZData import, no CSV code, no separate build DSL.
@@ -32,6 +44,7 @@ pub fn build(b: *std.Build) void {
         .root_source_file = "examples/minimal/main.zig",
         .portable_gui = portable, .install = false, .run_step = null,
     });
+    minimal.executable.root_module.addImport("zevui", kit);
     const minimal_step = b.step("minimal", "Compile the Zevui app without ZData");
     minimal_step.dependOn(&minimal.executable.step);
     const minimal_run_step = b.step("minimal-run", "Run the independent Zevui DVUI app");

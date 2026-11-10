@@ -4,6 +4,7 @@
     .fingerprint = 0x525d57945f45ed28,
     .minimum_zig_version = "0.17.1",
     .dependencies = .{
+        .zevui = .{ .path = "framework" },
         // Same pinned DVUI source and content hash as dvui-demo (9 Nov 2026).
         .dvui = .{
             .url = "git+https://github.com/david-vanderson/dvui?ref=main#4ed19f847fd0ec6ec97f9600316d86c0e0cd255c",

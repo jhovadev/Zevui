@@ -15,7 +15,7 @@ class ZevuiUiContracts(unittest.TestCase):
         self.assertIn("experimental", readme)
 
     def test_ui_has_real_empty_state_actions_and_source_row_gutter(self):
-        main = (ROOT / "src/main.zig").read_text()
+        main = (ROOT / "examples/csv-explorer/src/main.zig").read_text()
         self.assertIn("brand.title", main)
         self.assertIn("brand.icon_png", main)
         self.assertIn('"+ Abrir archivo"', main)
@@ -27,7 +27,7 @@ class ZevuiUiContracts(unittest.TestCase):
         self.assertIn('if (!state.show_search) return;', main)
 
     def test_design_tokens_still_pure(self):
-        tokens = (ROOT / "src/ui/tokens.zig").read_text()
+        tokens = (ROOT / "framework/src/ui/tokens.zig").read_text()
         self.assertNotIn('@import("dvui")', tokens)
         self.assertIn('density: Density = .compact', tokens)
         self.assertTrue((ROOT / "docs/ui-guidelines.md").is_file())

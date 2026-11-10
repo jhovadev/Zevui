@@ -14,6 +14,10 @@ jobs:
         uses: mlugg/setup-zig@v2
         with:
           version: 0.17.1
+      - name: Test standalone Zevui SDK without ZData
+        run: cd framework && zig build test -Doptimize=ReleaseSafe
+      - name: Verify F3 product boundaries
+        run: python3 -m unittest tests.test_architecture_f3 -v
       - name: Validate dependency integration
         run: python3 scripts/check_layout.py
       - name: Validate recipe targets

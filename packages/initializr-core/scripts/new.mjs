@@ -28,7 +28,7 @@ async function main() {
   const request = normalizeProject(config, catalog, randomInt(1, 0xffffffff));
   const plan = planProject(request, catalog);
   const sources = Object.create(null);
-  const paths = ['examples/minimal/main.zig', ...plan.operations.filter(o => o.kind === 'copy').map(o => o.source)];
+  const paths = ['templates/compat/minimal/main.zig', ...plan.operations.filter(o => o.kind === 'copy').map(o => o.source)];
   for (const file of new Set(paths)) sources[file] = new Uint8Array(await readFile(join(ROOT, file)));
   const generated = generateProject(request, catalog, sources);
   const dest = resolve(output, request.name);

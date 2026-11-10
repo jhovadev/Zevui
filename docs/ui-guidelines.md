@@ -43,8 +43,8 @@ those paths to README. Do not include Excel template images as actual app UI.
 
 ## Separation of responsibilities
 
-`src/ui/` contains no CSV decoding or SDK algorithms. `src/csv.zig` owns CSV
-semantics, `src/search.zig` owns operations, and ZData provides generic
+`framework/src/ui/` contains no CSV decoding or SDK algorithms. `examples/csv-explorer/src/csv.zig` owns CSV
+semantics, `examples/csv-explorer/src/search.zig` owns operations, and ZData provides generic
 structural scanning. No data conversion or filtering runs as part of theme
 changes; UI state changes request redraws through DVUI.
 

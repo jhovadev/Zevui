@@ -1,0 +1,9 @@
+// Standalone publishable Zevui SDK. It never includes ZData/CSV/Initializr.
+.{
+    .name = .zevui,
+    .version = "0.1.0",
+    .fingerprint = 0x4fe248ef6dc0a14b,
+    .minimum_zig_version = "0.17.1",
+    .dependencies = .{},
+    .paths = .{ "build.zig", "build.zig.zon", "src", "README.md", "LICENSE" },
+}
