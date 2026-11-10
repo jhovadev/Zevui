@@ -12,7 +12,7 @@ pub fn MemoryStore(comptime capacity: usize, comptime key_max: usize, comptime v
             key: [key_max]u8 = undefined,
             val: [value_max]u8 = undefined,
         };
-        entries: [capacity]Entry = [_]Entry{.{}} ** capacity,
+        entries: [capacity]Entry = @splat(.{}),
         pub const Error = error{ KeyTooLarge, ValueTooLarge, Full };
 
         fn find(self: *const Self, key: []const u8) ?usize {

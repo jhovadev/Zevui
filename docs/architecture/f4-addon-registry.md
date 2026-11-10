@@ -59,3 +59,7 @@ Python tests and `tsc` alone cannot prove Zig module compatibility. Revert the
 F4 commit if package builds fail; the previous `registry/catalog.json` and
 `addons/*.zig` source-copy layout is preserved in Git history. No `zig fetch`
 was run here because no public addon URL exists.
+
+## F4.1 compiler hotfix
+
+The F4 `memory_store` test initially failed Zig 0.17.1 parsing because its array repeat initialization used `**`. Zig 0.17.1 documents `@splat` for fixed-size array initialization. The implementation uses `@splat(.{})` and the historical F2 hashes remain unmodified. `tests/fixtures/f41-golden-overrides.json` documents the one intentional source-level compatibility change. Run `just addons-check`, then `just registry-check` before closing F4.1.

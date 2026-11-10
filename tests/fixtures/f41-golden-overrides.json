@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "overrides": {
+    "src/addons/memory_store.zig": {
+      "sha256": "a059879ff6a8b26d164dbc44494e2a01c78cb2780de8b0258579306a43ba519e",
+      "reason": "F4.1: Zig 0.17.1 array repetition syntax replaced by @splat(.{}); F2 fixture remains immutable"
+    }
+  }
+}

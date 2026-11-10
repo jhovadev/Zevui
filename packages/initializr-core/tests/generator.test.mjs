@@ -9,6 +9,7 @@ const root = new URL('../../../', import.meta.url);
 const read = (p) => readFileSync(new URL(p, root));
 const registry = JSON.parse(read('registry/catalog.json'));
 const golden = JSON.parse(read('tests/fixtures/initializr-f2-golden.json'));
+const compatibility = JSON.parse(read('tests/fixtures/f41-golden-overrides.json')).overrides;
 const sources = Object.fromEntries([
   'templates/compat/minimal/main.zig', 'templates/compat/zevui/build.zig', 'templates/compat/zevui/config.zig',
   'addons/design-tokens/src/root.zig', 'addons/memory-store/src/root.zig',
@@ -20,7 +21,7 @@ for (const [key, { project, files }] of Object.entries(golden)) {
     assert.deepEqual([...g.files.keys()].sort(), Object.keys(files).sort());
     for (const [path, expected] of Object.entries(files)) {
       const actual = createHash('sha256').update(g.files.get(path)).digest('hex');
-      assert.equal(actual, expected, path);
+      assert.equal(actual, compatibility[path]?.sha256 ?? expected, path);
     }
   });
 }

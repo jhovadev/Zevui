@@ -50,9 +50,16 @@ class ArchitectureF4Tests(unittest.TestCase):
     def test_golden_addon_content_unchanged(self):
         fixture = json.loads((ROOT / 'tests/fixtures/initializr-f2-golden.json').read_text())
         golden = fixture['addons']['files']
+        overrides = json.loads((ROOT / 'tests/fixtures/f41-golden-overrides.json').read_text())['overrides']
         for ident, dirname in [('memory_store', 'memory-store'), ('design_tokens', 'design-tokens')]:
             actual = hashlib.sha256((ROOT / 'addons' / dirname / 'src/root.zig').read_bytes()).hexdigest()
-            self.assertEqual(actual, golden[f'src/addons/{ident}.zig'])
+            path = f'src/addons/{ident}.zig'
+            self.assertEqual(actual, overrides.get(path, {}).get('sha256', golden[path]))
+
+    def test_memory_store_uses_zig_017_array_initialization(self):
+        source = (ROOT / 'addons/memory-store/src/root.zig').read_text()
+        self.assertIn('entries: [capacity]Entry = @splat(.{}),', source)
+        self.assertNotIn(' ** capacity', source)
 
     def test_manifest_validator_rejects_invalid_paths_and_unpinned_package(self):
         base = json.loads((ROOT / 'addons/memory-store/addon.json').read_text())
