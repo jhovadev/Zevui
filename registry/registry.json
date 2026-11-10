@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "registryVersion": "0.2.0",
+  "zig": "0.17.1",
+  "framework": "DVUI + SDL3",
+  "supportedZig": [
+    "0.17.1"
+  ],
+  "packages": {
+    "dvui": {
+      "url": "git+https://github.com/david-vanderson/dvui?ref=main#4ed19f847fd0ec6ec97f9600316d86c0e0cd255c",
+      "hash": "dvui-0.6.0-dev-AQFJmaGoBAG4gedKz36Pkv4RuRs86V5BjXavPsYijdkp"
+    }
+  },
+  "manifests": [
+    "addons/memory-store/addon.json",
+    "addons/design-tokens/addon.json",
+    "registry/planned/zdata.json",
+    "registry/planned/tray.json",
+    "registry/planned/sqlite.json",
+    "registry/planned/bundle.json"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Zevui addon manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "version", "name", "category", "description", "kind", "status", "delivery", "default", "provides", "requires", "conflicts", "compat", "package", "trust", "license", "files"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_-]{1,63}$"},
+    "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "name": {"type": "string", "minLength": 1},
+    "category": {"type": "string", "minLength": 1},
+    "description": {"type": "string", "minLength": 1},
+    "kind": {"enum": ["zig", "c-bundled", "c-system", "planned"]},
+    "status": {"enum": ["available", "manual", "planned", "deprecated"]},
+    "delivery": {"enum": ["source-copy", "package", "unavailable"]},
+    "default": {"type": "boolean"},
+    "provides": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "requires": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "conflicts": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "compat": {
+      "type": "object", "required": ["zig", "zevui", "targets"], "additionalProperties": false,
+      "properties": {
+        "zig": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "zevui": {"type": "string"},
+        "targets": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["linux", "windows", "macos"]}}
+      }
+    },
+    "package": {
+      "oneOf": [{"type": "null"}, {"type": "object", "required": ["url", "hash"], "additionalProperties": false,
+        "properties": {"url": {"type": "string", "minLength": 1}, "hash": {"type": "string", "minLength": 20}}}]
+    },
+    "trust": {"enum": ["official", "verified", "community"]},
+    "license": {"type": "string", "minLength": 1},
+    "files": {"type": "array", "items": {"type": "object", "required": ["from", "to"], "additionalProperties": false,
+      "properties": {"from": {"type": "string"}, "to": {"type": "string"}}}}
+  }
+}

@@ -14,6 +14,12 @@ jobs:
         uses: mlugg/setup-zig@v2
         with:
           version: 0.17.1
+      - name: Check F4 registry derives from individual manifests
+        run: python3 tools/build_registry.py --check
+      - name: Compile isolated F4 Zig addons
+        run: |
+          (cd addons/memory-store && zig build test -Doptimize=ReleaseSafe)
+          (cd addons/design-tokens && zig build test -Doptimize=ReleaseSafe)
       - name: Test standalone Zevui SDK without ZData
         run: cd framework && zig build test -Doptimize=ReleaseSafe
       - name: Verify F3 product boundaries

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "zdata",
+  "version": "0.0.0",
+  "name": "ZData",
+  "category": "Data",
+  "description": "Optional Zig Data Engine integration; requires package pinning.",
+  "kind": "planned",
+  "status": "manual",
+  "delivery": "unavailable",
+  "default": false,
+  "provides": [],
+  "requires": [],
+  "conflicts": [],
+  "compat": {
+    "zig": [
+      "0.17.1"
+    ],
+    "zevui": "0.1.0",
+    "targets": [
+      "linux",
+      "windows",
+      "macos"
+    ]
+  },
+  "package": null,
+  "trust": "official",
+  "license": "NOASSERTION",
+  "files": []
+}

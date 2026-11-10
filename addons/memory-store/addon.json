@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "memory_store",
+  "version": "0.1.0",
+  "name": "Memory Store",
+  "category": "State",
+  "description": "Bounded, allocation-free key/value state; copies keys and values. Volatile by design.",
+  "kind": "zig",
+  "status": "available",
+  "delivery": "source-copy",
+  "default": false,
+  "provides": [
+    "memory_store"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "compat": {
+    "zig": [
+      "0.17.1"
+    ],
+    "zevui": "0.1.0",
+    "targets": [
+      "linux",
+      "windows",
+      "macos"
+    ]
+  },
+  "package": null,
+  "trust": "official",
+  "license": "MIT",
+  "files": [
+    {
+      "from": "addons/memory-store/src/root.zig",
+      "to": "src/addons/memory_store.zig"
+    }
+  ]
+}

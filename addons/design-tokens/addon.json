@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "design_tokens",
+  "version": "0.1.0",
+  "name": "Design Tokens",
+  "category": "UI",
+  "description": "Zig-only theme palette and spacing tokens (no browser runtime).",
+  "kind": "zig",
+  "status": "available",
+  "delivery": "source-copy",
+  "default": true,
+  "provides": [
+    "design_tokens"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "compat": {
+    "zig": [
+      "0.17.1"
+    ],
+    "zevui": "0.1.0",
+    "targets": [
+      "linux",
+      "windows",
+      "macos"
+    ]
+  },
+  "package": null,
+  "trust": "official",
+  "license": "MIT",
+  "files": [
+    {
+      "from": "addons/design-tokens/src/root.zig",
+      "to": "src/addons/design_tokens.zig"
+    }
+  ]
+}

@@ -238,3 +238,9 @@ will appear automatically; add file logging before a production release.
 The `identity.version` constant is available to your UI; packaging metadata
 (such as macOS Info.plist or complete Windows VERSIONINFO) should be added as
 a separate release configuration.
+
+## Addon packages (F4)
+
+`addons/memory-store/` and `addons/design-tokens/` are standalone Zig packages exposing `zevui_module`. The source of truth for available addons is `addons/*/addon.json`, with planned addons declared under `registry/planned/`. `registry/catalog.json` is generated for F2 compatibility; see [F4 registry](docs/architecture/f4-addon-registry.md).
+
+Run `just registry-manifests-check` and `just addons-check` before publishing. **Standalone remote package hashes are not yet available**; the Initializr preserves its verified source-copy bridge until F5.

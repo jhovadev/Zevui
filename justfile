@@ -35,6 +35,7 @@ set positional-arguments := true
 
 # Validate integration and run headless tests; no GUI/display required.
 @check:
+    python3 tools/build_registry.py --check
     python3 scripts/check_layout.py
     python3 -m unittest discover -s tests -v
     zig build test -Doptimize=ReleaseSafe
@@ -161,6 +162,7 @@ set positional-arguments := true
 
 # Verify registry schema, pure planner and its deterministic Zig project plan.
 @registry-check:
+    python3 tools/build_registry.py --check
     @if [ ! -x apps/initializr/node_modules/.bin/tsc ]; then echo 'Run just initializr-setup first (TypeScript toolchain missing)' >&2; exit 1; fi
     apps/initializr/node_modules/.bin/tsc -p packages/initializr-core/tsconfig.json
     node --test packages/initializr-core/tests/*.test.mjs
@@ -170,3 +172,19 @@ set positional-arguments := true
 @ecosystem-check:
     just registry-check
     just initializr-check
+
+# F4 registry: validate independent addon manifests, generated metadata and lockstep catalog.
+@registry-build:
+    python3 tools/build_registry.py --write
+
+@registry-manifests-check:
+    python3 tools/build_registry.py --check
+
+# Zig pure addons compile and test as separate packages; no DVUI/SDL/ZData imports.
+@addons-check:
+    cd addons/memory-store && zig build test -Doptimize=ReleaseSafe
+    cd addons/design-tokens && zig build test -Doptimize=ReleaseSafe
+
+# Verify published addon pin on demand (requires network); never fabricate hashes.
+@pin-addon id url:
+    python3 tools/pin_addon.py "$1" --url "$2" --write

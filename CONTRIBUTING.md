@@ -59,3 +59,7 @@ The production generator is TypeScript only. Changes to rendering require
 SHA-256 fixtures (`tests/fixtures/initializr-f2-golden.json`). Do not wire
 `tests/legacy_oracle/` into any API or CLI route. F3 extracts the standalone SDK package. Run `just framework-check` before any publication.
 Generated-project compatibility sources remain frozen under `templates/compat/` until F5.
+
+### F4 addon registry workflow
+
+Edit `addons/<package>/addon.json` (or `registry/planned/<id>.json`), not the generated `registry/catalog.json`. Run `just registry-build`, `just registry-manifests-check`, `just addons-check`, then `just ecosystem-check`. Remote pins come only from `tools/pin_addon.py` invoking a real `zig fetch` against an immutable URL. See `docs/architecture/f4-addon-registry.md`.

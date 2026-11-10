@@ -1,0 +1,9 @@
+// Independent Zig 0.17.1 addon package. The public name and fingerprint must stay stable.
+.{
+    .name = .zevui_addon_design_tokens,
+    .version = "0.1.0",
+    .fingerprint = 0x3371b8ed00000001,
+    .minimum_zig_version = "0.17.1",
+    .dependencies = .{},
+    .paths = .{ "build.zig", "build.zig.zon", "src", "LICENSE", "README.md" },
+}

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "bundle",
+  "version": "0.0.0",
+  "name": "Native Bundler",
+  "category": "Distribution",
+  "description": "Windows, Linux, macOS native packaging planned.",
+  "kind": "planned",
+  "status": "planned",
+  "delivery": "unavailable",
+  "default": false,
+  "provides": [],
+  "requires": [],
+  "conflicts": [],
+  "compat": {
+    "zig": [
+      "0.17.1"
+    ],
+    "zevui": "0.1.0",
+    "targets": [
+      "linux",
+      "windows",
+      "macos"
+    ]
+  },
+  "package": null,
+  "trust": "official",
+  "license": "NOASSERTION",
+  "files": []
+}

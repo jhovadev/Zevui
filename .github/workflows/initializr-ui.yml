@@ -38,6 +38,7 @@ jobs:
         run: |
           apps/initializr/node_modules/.bin/tsc -p packages/initializr-core/tsconfig.json
           node --test packages/initializr-core/tests/*.test.mjs
+          python3 tools/build_registry.py --check
           python3 -m unittest discover -s tests -p 'test_registry*.py' -v
           python3 -m unittest discover -s tests -p 'test_initializr*.py' -v
       - uses: mlugg/setup-zig@v2

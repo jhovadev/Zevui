@@ -1,0 +1,210 @@
+{
+  "schemaVersion": 1,
+  "registryVersion": "0.2.0",
+  "channel": "0.17",
+  "supportedZig": [
+    "0.17.1"
+  ],
+  "packages": {
+    "dvui": {
+      "url": "git+https://github.com/david-vanderson/dvui?ref=main#4ed19f847fd0ec6ec97f9600316d86c0e0cd255c",
+      "hash": "dvui-0.6.0-dev-AQFJmaGoBAG4gedKz36Pkv4RuRs86V5BjXavPsYijdkp"
+    }
+  },
+  "addons": [
+    {
+      "schemaVersion": 1,
+      "id": "memory_store",
+      "version": "0.1.0",
+      "name": "Memory Store",
+      "category": "State",
+      "description": "Bounded, allocation-free key/value state; copies keys and values. Volatile by design.",
+      "kind": "zig",
+      "status": "available",
+      "delivery": "source-copy",
+      "default": false,
+      "provides": [
+        "memory_store"
+      ],
+      "requires": [],
+      "conflicts": [],
+      "compat": {
+        "zig": [
+          "0.17.1"
+        ],
+        "zevui": "0.1.0",
+        "targets": [
+          "linux",
+          "windows",
+          "macos"
+        ]
+      },
+      "package": null,
+      "trust": "official",
+      "license": "MIT",
+      "files": [
+        {
+          "from": "addons/memory-store/src/root.zig",
+          "to": "src/addons/memory_store.zig"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "design_tokens",
+      "version": "0.1.0",
+      "name": "Design Tokens",
+      "category": "UI",
+      "description": "Zig-only theme palette and spacing tokens (no browser runtime).",
+      "kind": "zig",
+      "status": "available",
+      "delivery": "source-copy",
+      "default": true,
+      "provides": [
+        "design_tokens"
+      ],
+      "requires": [],
+      "conflicts": [],
+      "compat": {
+        "zig": [
+          "0.17.1"
+        ],
+        "zevui": "0.1.0",
+        "targets": [
+          "linux",
+          "windows",
+          "macos"
+        ]
+      },
+      "package": null,
+      "trust": "official",
+      "license": "MIT",
+      "files": [
+        {
+          "from": "addons/design-tokens/src/root.zig",
+          "to": "src/addons/design_tokens.zig"
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "zdata",
+      "version": "0.0.0",
+      "name": "ZData",
+      "category": "Data",
+      "description": "Optional Zig Data Engine integration; requires package pinning.",
+      "kind": "planned",
+      "status": "manual",
+      "delivery": "unavailable",
+      "default": false,
+      "provides": [],
+      "requires": [],
+      "conflicts": [],
+      "compat": {
+        "zig": [
+          "0.17.1"
+        ],
+        "zevui": "0.1.0",
+        "targets": [
+          "linux",
+          "windows",
+          "macos"
+        ]
+      },
+      "package": null,
+      "trust": "official",
+      "license": "NOASSERTION",
+      "files": []
+    },
+    {
+      "schemaVersion": 1,
+      "id": "tray",
+      "version": "0.0.0",
+      "name": "System Tray",
+      "category": "Native",
+      "description": "SDL3 system-tray adapter planned; opt-in, not silently installed.",
+      "kind": "planned",
+      "status": "planned",
+      "delivery": "unavailable",
+      "default": false,
+      "provides": [],
+      "requires": [],
+      "conflicts": [],
+      "compat": {
+        "zig": [
+          "0.17.1"
+        ],
+        "zevui": "0.1.0",
+        "targets": [
+          "linux",
+          "windows",
+          "macos"
+        ]
+      },
+      "package": null,
+      "trust": "official",
+      "license": "NOASSERTION",
+      "files": []
+    },
+    {
+      "schemaVersion": 1,
+      "id": "sqlite",
+      "version": "0.0.0",
+      "name": "SQLite",
+      "category": "Storage",
+      "description": "Prepared statements and migration support planned; not in initial generator.",
+      "kind": "planned",
+      "status": "planned",
+      "delivery": "unavailable",
+      "default": false,
+      "provides": [],
+      "requires": [],
+      "conflicts": [],
+      "compat": {
+        "zig": [
+          "0.17.1"
+        ],
+        "zevui": "0.1.0",
+        "targets": [
+          "linux",
+          "windows",
+          "macos"
+        ]
+      },
+      "package": null,
+      "trust": "official",
+      "license": "NOASSERTION",
+      "files": []
+    },
+    {
+      "schemaVersion": 1,
+      "id": "bundle",
+      "version": "0.0.0",
+      "name": "Native Bundler",
+      "category": "Distribution",
+      "description": "Windows, Linux, macOS native packaging planned.",
+      "kind": "planned",
+      "status": "planned",
+      "delivery": "unavailable",
+      "default": false,
+      "provides": [],
+      "requires": [],
+      "conflicts": [],
+      "compat": {
+        "zig": [
+          "0.17.1"
+        ],
+        "zevui": "0.1.0",
+        "targets": [
+          "linux",
+          "windows",
+          "macos"
+        ]
+      },
+      "package": null,
+      "trust": "official",
+      "license": "NOASSERTION",
+      "files": []
+    }
+  ]
+}
