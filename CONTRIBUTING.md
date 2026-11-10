@@ -37,3 +37,17 @@ For the project generator use Node.js 24+, Bun, and Python 3. Run `just initiali
 ### Addons and registry
 
 See `registry/README.md` for the official-only addon review process and `just ecosystem-check` for the registry/planner gates. Do not mark a planned addon as available without a working Zig source, pinned external dependencies when applicable, and an end-to-end generated-project build.
+
+## Architecture migration F1–F6
+
+Read [`docs/architecture/f1-freeze.md`](docs/architecture/f1-freeze.md),
+[`docs/architecture/migration-roadmap.md`](docs/architecture/migration-roadmap.md)
+and the proposed ADRs in [`docs/adr/`](docs/adr/) before renaming/moving code.
+Create the Z0+F0 base commit before changing tracked paths; migrate one
+phase per commit/PR with `git mv`. Do not claim builds succeeded unless
+commands ran; on failed gates, halt rather than bypass tests.
+
+Run `python3 -m unittest discover -s tests -v` as part of `just check`: it
+includes `tests/test_architecture_f1.py`. Update the F1 assertions as part
+of the **same PR** that moves or replaces a documented API. Preserve
+`zevui.zon` public keys and the Windows GUI subsystem/debug override.

@@ -35,6 +35,13 @@ just ecosystem-check    # plus legacy ZIP generator contract tests
 
 Read [Z0 ecosystem design and APIs](docs/ecosystem-z0.md).
 
+**Monorepo migration:** [F0 current-state audit](docs/architecture/current-state.md),
+[F1 baseline and acceptance gates](docs/architecture/f1-freeze.md),
+[target architecture](docs/architecture/target-architecture.md), and
+[F1–F6 migration roadmap](docs/architecture/migration-roadmap.md). The ADRs
+under [`docs/adr/`](docs/adr/) remain *proposed*; no source paths have moved.
+
+
 The web UI lives in [`apps/initializr/`](apps/initializr/) and has SolidStart API routes at `/api/catalog`, `/api/metadata`, `/api/plan` and `/api/generate`. Generation remains in [`initializr/generator.py`](initializr/generator.py), called through [`initializr/bridge.py`](initializr/bridge.py) (bounded stdin JSON → binary ZIP). **SolidStart is for developer tooling only; it is not embedded in generated DVUI desktop apps.**
 
 Supported generated addons: `memory_store` (bounded volatile KV) and `design_tokens` (pure Zig multitheme tokens). SQLite, tray, bundle and ZData appear in the catalog with explicit non-ready statuses. See [Initializr architecture](docs/initializr.md).
