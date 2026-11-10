@@ -9,6 +9,7 @@ on:
       - 'registry/**'
       - 'packages/initializr-core/**'
       - 'addons/**'
+      - 'templates/**'
       - 'tests/test_initializr*.py'
       - '.github/workflows/initializr-ui.yml'
   pull_request:
@@ -20,6 +21,7 @@ on:
       - 'registry/**'
       - 'packages/initializr-core/**'
       - 'addons/**'
+      - 'templates/**'
       - 'tests/test_initializr*.py'
       - '.github/workflows/initializr-ui.yml'
 jobs:
@@ -50,6 +52,11 @@ jobs:
           node packages/initializr-core/scripts/new.mjs z0-addons --addon memory_store --addon design_tokens --output /tmp
           (cd /tmp/z0-minimal && zig build test -Doptimize=ReleaseSafe && zig build -Doptimize=ReleaseSafe)
           (cd /tmp/z0-addons && zig build test -Doptimize=ReleaseSafe && zig build -Doptimize=ReleaseSafe)
+      - name: Compile Windows portable starter (experimental cross-target gate)
+        continue-on-error: true
+        run: |
+          (cd /tmp/z0-minimal && zig build -Dtarget=x86_64-windows-gnu -Dportable-gui=true -Doptimize=ReleaseSafe)
+          (cd /tmp/z0-addons && zig build -Dtarget=x86_64-windows-gnu -Dportable-gui=true -Doptimize=ReleaseSafe)
       - name: Typecheck SolidStart
         working-directory: apps/initializr
         run: bun run typecheck

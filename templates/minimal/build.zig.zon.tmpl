@@ -1,0 +1,13 @@
+.{
+    .name = .{{ZIG_PACKAGE_NAME}},
+    .version = {{VERSION_JSON}},
+    .fingerprint = {{FINGERPRINT}},
+    .minimum_zig_version = {{ZIG_VERSION_JSON}},
+    .dependencies = .{
+        .dvui = .{
+            .url = {{DVUI_URL_JSON}},
+            .hash = {{DVUI_HASH_JSON}},
+        },
+    },
+    .paths = .{ "" },
+}

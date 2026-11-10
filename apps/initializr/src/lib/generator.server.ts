@@ -4,7 +4,7 @@ import { realpath, lstat } from "node:fs/promises";
 import { relative, resolve, sep } from "node:path";
 import type { Catalog } from "./types";
 import {
-  generateProject as generateFiles, normalizeProject, zipProject,
+  generateProject as generateFiles, normalizeProject, zipProject, requiredSources,
 } from "../../../../packages/initializr-core/src/generator.js";
 import { planProject, PlanError } from "../../../../packages/initializr-core/src/index.js";
 
@@ -48,10 +48,7 @@ export async function generateProject(request: unknown): Promise<Uint8Array> {
   const catalog = await readCatalog();
   const project = normalizeProject(request, catalog, randomFingerprintId());
   const plan = planProject(project, catalog);
-  const sources = await loadSources([
-    "examples/minimal/main.zig",
-    ...plan.operations.filter((operation) => operation.kind === "copy").map((operation) => operation.source!),
-  ]);
+  const sources = await loadSources(requiredSources(plan));
   return zipProject(generateFiles(project, catalog, sources));
 }
 

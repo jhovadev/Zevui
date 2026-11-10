@@ -1,0 +1,17 @@
+# {{TITLE_RAW}}
+
+Generated with **Zevui Initializr** (Zig {{ZIG_VERSION_RAW}} / DVUI + SDL3).
+
+This is a standalone Zig project; no Zevui CLI or Python is needed to build.
+
+```sh
+zig build
+zig build run
+zig build -Dportable-gui=true
+```
+
+Addons:
+{{ADDON_DOCS}}
+The SDL3 GUI may require native graphics libraries/SDKs for your target.
+Windows uses the GUI subsystem by default; `-Dwindows-console=true` enables a debug console.
+Generated from the M0.5 local Build Core; the Zevui package is not yet published.

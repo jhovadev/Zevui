@@ -56,7 +56,8 @@ class FrameworkF3Contracts(unittest.TestCase):
             self.assertNotIn('zdata.bits', code)
 
     def test_legacy_generator_remains_frozen(self):
-        self.assertTrue((ROOT / 'templates/compat/minimal/main.zig').is_file())
+        self.assertTrue((ROOT / 'templates/compat/minimal/main.zig').is_file()) # archived golden fixture
+        self.assertTrue((ROOT / 'templates/minimal/src/main.zig').is_file()) # F5 production source
         for name in ('build.zig', 'config.zig'):
             self.assertTrue((ROOT / 'templates/compat/zevui' / name).is_file())
         planner = (ROOT / 'packages/initializr-core/src/index.ts').read_text()

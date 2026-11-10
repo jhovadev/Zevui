@@ -5,7 +5,7 @@ import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomInt } from 'node:crypto';
 import { planProject, PlanError } from '../dist/index.js';
-import { generateProject, normalizeProject } from '../dist/generator.js';
+import { generateProject, normalizeProject, requiredSources } from '../dist/generator.js';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const argv = process.argv.slice(2);
@@ -28,7 +28,7 @@ async function main() {
   const request = normalizeProject(config, catalog, randomInt(1, 0xffffffff));
   const plan = planProject(request, catalog);
   const sources = Object.create(null);
-  const paths = ['templates/compat/minimal/main.zig', ...plan.operations.filter(o => o.kind === 'copy').map(o => o.source)];
+  const paths = requiredSources(plan);
   for (const file of new Set(paths)) sources[file] = new Uint8Array(await readFile(join(ROOT, file)));
   const generated = generateProject(request, catalog, sources);
   const dest = resolve(output, request.name);

@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { generateProject, normalizeProject, zipProject } from '../dist/generator.js';
+import { generateProject, normalizeProject, zipProject, requiredSources } from '../dist/generator.js';
 import { planProject, PlanError } from '../dist/index.js';
 
 const root = new URL('../../../', import.meta.url);
@@ -11,7 +11,10 @@ const registry = JSON.parse(read('registry/catalog.json'));
 const golden = JSON.parse(read('tests/fixtures/initializr-f2-golden.json'));
 const compatibility = JSON.parse(read('tests/fixtures/f41-golden-overrides.json')).overrides;
 const sources = Object.fromEntries([
-  'templates/compat/minimal/main.zig', 'templates/compat/zevui/build.zig', 'templates/compat/zevui/config.zig',
+  'templates/minimal/build.zig.tmpl', 'templates/minimal/build.zig.zon.tmpl',
+  'templates/minimal/zevui.zon.tmpl', 'templates/minimal/README.md.tmpl',
+  'templates/minimal/.gitignore', 'templates/minimal/src/main.zig',
+  'templates/compat/zevui/build.zig', 'templates/compat/zevui/config.zig',
   'addons/design-tokens/src/root.zig', 'addons/memory-store/src/root.zig',
 ].map(p => [p, read(p)]));
 
@@ -95,4 +98,31 @@ test('CLI disk adapter uses the same renderer, refuses overwrite', async () => {
     assert.notEqual(second.status, 0);
     assert.match(second.stderr, /already exists/);
   } finally { rmSync(tmp, {recursive:true, force:true}); }
+});
+
+test('production API and CLI consume only canonical source list, including templates', () => {
+  const p = golden.addons.project;
+  const plan = planProject(p, registry);
+  const expected = requiredSources(plan);
+  assert.equal(expected.length, 8 + 2); // 6 starter templates, 2 compat SDK, 2 selected addons
+  assert.deepEqual(expected, [...expected].sort());
+  assert.deepEqual(expected, Object.keys(sources).sort());
+  const generated = generateProject(p, registry, sources);
+  assert.ok(generated.files.has('src/main.zig'));
+});
+
+test('missing template and unknown template tokens fail closed', () => {
+  const p = golden.minimal.project;
+  const missing = {...sources};
+  delete missing['templates/minimal/build.zig.tmpl'];
+  assert.throws(() => generateProject(p, registry, missing), e => e instanceof PlanError && e.code === 'source');
+  const corrupt = {...sources, 'templates/minimal/build.zig.tmpl': '{{UNKNOWN_FIELD}}'};
+  assert.throws(() => generateProject(p, registry, corrupt), e => e instanceof PlanError && e.code === 'template');
+});
+
+test('user-supplied braces are inert data and never reinterpreted as template tokens', () => {
+  const p = {...golden.minimal.project, title: 'Real {{TITLE_RAW}} App'};
+  const g = generateProject(p, registry, sources);
+  const readme = new TextDecoder().decode(g.files.get('README.md'));
+  assert.ok(readme.includes('Real {{TITLE_RAW}} App'));
 });

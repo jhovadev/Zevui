@@ -47,73 +47,37 @@ export function normalizeProject(input: unknown, catalog: Catalog, fingerprintId
   };
 }
 
-function renderBuild(addons: string[]): string {
-  const entries = addons.map((id) => `, "src/addons/${id}.zig"`).join("");
-  return `const std = @import("std");
-const zevui = @import("zevui/build.zig");
+/** Reviewed, editable starter assets. The planner remains the single source of output paths. */
+export const STARTER_SOURCES = [
+  "templates/minimal/build.zig.tmpl",
+  "templates/minimal/build.zig.zon.tmpl",
+  "templates/minimal/zevui.zon.tmpl",
+  "templates/minimal/README.md.tmpl",
+  "templates/minimal/.gitignore",
+  "templates/minimal/src/main.zig",
+] as const;
 
-pub fn build(b: *std.Build) void {
-    const cfg: zevui.Config = @import("zevui.zon");
-    const target = b.standardTargetOptions(.{});
-    const optimize = b.standardOptimizeOption(.{});
-    const portable = b.option(bool, "portable-gui", "Disable optional DVUI native dependencies") orelse false;
-    const windows_console = b.option(bool, "windows-console", "Enable Windows debug console") orelse false;
-    _ = zevui.addApp(b, cfg, .{
-        .target = target,
-        .optimize = optimize,
-        .root_source_file = "src/main.zig",
-        .portable_gui = portable,
-        .windows_console = windows_console,
-    });
-    const tests = b.step("test", "Run Zevui configuration and addon tests");
-    inline for (.{ "zevui/config.zig"${entries} }) |path| {
-        const unit = b.addTest(.{ .root_module = b.createModule(.{
-            .root_source_file = b.path(path), .target = target, .optimize = optimize,
-        }) });
-        tests.dependOn(&b.addRunArtifact(unit).step);
-    }
+/** Both the API and CLI load exactly the assets needed by the validated plan. */
+export function requiredSources(plan: Plan): string[] {
+  return [...new Set([...STARTER_SOURCES,
+    ...plan.operations.filter((op) => op.kind === "copy").map((op) => op.source!),
+  ])].sort();
 }
-`;
+
+function renderTemplate(path: string, sources: Sources, values: Record<string, string>): Uint8Array {
+  const template = new TextDecoder("utf-8", { fatal: true }).decode(value(sources[path], path));
+  // Validate the template itself; a user's literal title may legitimately contain {{braces}}.
+  const stripped = template.replace(/\{\{[A-Z0-9_]+\}\}/g, "");
+  if (/\{\{|\}\}/.test(stripped))
+    throw new PlanError("template", `Malformed placeholder in ${path}`);
+  const output = template.replace(/\{\{([A-Z0-9_]+)\}\}/g, (_match, key: string) => {
+    if (!Object.prototype.hasOwnProperty.call(values, key))
+      throw new PlanError("template", `Unknown placeholder ${key} in ${path}`);
+    return values[key];
+  });
+  return encoder.encode(output);
 }
-function renderZon(plan: Plan): string {
-  const p = plan.project;
-  return `.{
-    .identity = .{
-        .name = ${zigString(p.name)},
-        .title = ${zigString(p.title)},
-        .display_name = ${zigString(p.title)},
-        .short_name = "APP",
-        .screen_name = "Home",
-        .version = ${zigString(p.version)},
-        .organization = ${zigString(p.organization)},
-        .application = ${zigString(p.name)},
-    },
-    .window = .{ .width = 1100, .height = 720, .min_width = 640, .min_height = 480 },
-    .appearance = .{ .theme = "graphite", .accent = "lavender", .density = "compact" },
-    .modules = .{ .zdata = false },
-}
-`;
-}
-function renderManifest(plan: Plan): string {
-  const p = plan.project;
-  const dvui = plan.dependencies.dvui;
-  if (!plan.fingerprint || !dvui) throw new PlanError("pin", "Missing fingerprint or reviewed DVUI pin");
-  const name = p.name.replaceAll("-", "_");
-  return `.{
-    .name = .${name},
-    .version = ${zigString(p.version)},
-    .fingerprint = ${plan.fingerprint},
-    .minimum_zig_version = ${zigString(p.zig ?? "0.17.1")},
-    .dependencies = .{
-        .dvui = .{
-            .url = ${zigString(dvui.url)},
-            .hash = ${zigString(dvui.hash)},
-        },
-    },
-    .paths = .{ "" },
-}
-`;
-}
+
 function addonImports(plan: Plan, catalog: Catalog): { source: string; docs: string[] } {
   const addons = new Set(plan.resolvedAddons);
   const lines: string[] = [];
@@ -134,28 +98,39 @@ function addonImports(plan: Plan, catalog: Catalog): { source: string; docs: str
   }
   return { source: lines.map((line) => `\n${line}\n`).join(""), docs };
 }
-function renderReadme(plan: Plan, docs: string[]): string {
-  return `# ${plan.project.title}\n\nGenerated with **Zevui Initializr** (Zig ${plan.project.zig} / DVUI + SDL3).\n\n` +
-    'This is a standalone Zig project; no Zevui CLI or Python is needed to build.\n\n' +
-    '```sh\nzig build\nzig build run\nzig build -Dportable-gui=true\n```\n\n' +
-    'Addons:\n' + docs.map((line) => `- ${line}\n`).join("") + '\n' +
-    'The SDL3 GUI may require native graphics libraries/SDKs for your target.\n' +
-    'Windows uses the GUI subsystem by default; `-Dwindows-console=true` enables a debug console.\n' +
-    'Generated from the M0.5 local Build Core; the Zevui package is not yet published.\n';
-}
 /** Every emitted path must occur in the exact same canonical planner operations. */
 export function generateProject(input: ProjectInput, catalog: Catalog, sources: Sources): GeneratedProject {
   const plan = planProject(input, catalog);
   if (!plan.fingerprint) throw new PlanError("fingerprint", "Supply a non-reserved fingerprintId");
   const addon = addonImports(plan, catalog);
+  const p = plan.project;
+  const dvui = plan.dependencies.dvui;
+  if (!dvui) throw new PlanError("pin", "Missing reviewed DVUI pin");
+  const zigString = (data: string) => JSON.stringify(data);
+  const substitutions: Record<string, string> = {
+    NAME_JSON: zigString(p.name),
+    TITLE_JSON: zigString(p.title),
+    VERSION_JSON: zigString(p.version),
+    ORGANIZATION_JSON: zigString(p.organization),
+    ZIG_VERSION_JSON: zigString(p.zig ?? "0.17.1"),
+    DVUI_URL_JSON: zigString(dvui.url),
+    DVUI_HASH_JSON: zigString(dvui.hash),
+    FINGERPRINT: plan.fingerprint,
+    ZIG_PACKAGE_NAME: p.name.replaceAll("-", "_"),
+    TITLE_RAW: p.title,
+    ZIG_VERSION_RAW: p.zig ?? "0.17.1",
+    ADDON_TEST_PATHS: plan.resolvedAddons.map((id) => `, "src/addons/${id}.zig"`).join(""),
+    ADDON_DOCS: addon.docs.map((line) => `- ${line}\n`).join(""),
+  };
   const generated: Record<string, Uint8Array> = {
-    "build.zig": encoder.encode(renderBuild(plan.resolvedAddons)),
-    "build.zig.zon": encoder.encode(renderManifest(plan)),
-    "zevui.zon": encoder.encode(renderZon(plan)),
-    "README.md": encoder.encode(renderReadme(plan, addon.docs)),
-    ".gitignore": encoder.encode(".zig-cache/\nzig-out/\ndist/\n"),
+    "build.zig": renderTemplate("templates/minimal/build.zig.tmpl", sources, substitutions),
+    "build.zig.zon": renderTemplate("templates/minimal/build.zig.zon.tmpl", sources, substitutions),
+    "zevui.zon": renderTemplate("templates/minimal/zevui.zon.tmpl", sources, substitutions),
+    "README.md": renderTemplate("templates/minimal/README.md.tmpl", sources, substitutions),
+    ".gitignore": value(sources["templates/minimal/.gitignore"], "templates/minimal/.gitignore"),
     "src/main.zig": (() => {
-      const base = value(sources["templates/compat/minimal/main.zig"], "templates/compat/minimal/main.zig");
+      const path = "templates/minimal/src/main.zig";
+      const base = value(sources[path], path);
       const suffix = encoder.encode(addon.source);
       const result = new Uint8Array(base.length + suffix.length);
       result.set(base); result.set(suffix, base.length);
