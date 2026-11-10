@@ -1,0 +1,30 @@
+# Manual only: attempts native GUI compilation on matching OS runners.
+# Experimental smoke is non-gating; success is not a packaged release claim.
+name: Native desktop compile (experimental)
+on:
+  workflow_dispatch:
+
+jobs:
+  gui-compile:
+    name: ${{ matrix.os }} / portable GUI
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-15]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: 0.17.1
+      - name: Test reusable modules (headless)
+        run: zig build test -Doptimize=ReleaseSafe
+      - name: Verify local design / target scripts
+        run: python -m unittest discover -s tests -v
+      - name: Attempt native GUI build with fewer dependencies
+        run: zig build -Dportable-gui=true -Doptimize=ReleaseFast
+      # Run GUI interactions and packaging on real target hosts before releases.

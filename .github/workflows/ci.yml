@@ -1,0 +1,28 @@
+name: Zevui build core and CSV checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  headless-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out example
+        uses: actions/checkout@v4
+      - name: Set up Zig 0.17.1
+        uses: mlugg/setup-zig@v2
+        with:
+          version: 0.17.1
+      - name: Validate dependency integration
+        run: python3 scripts/check_layout.py
+      - name: Validate recipe targets
+        run: python3 -m unittest discover -s tests -v
+      - name: Compile headless tests for host
+        run: zig build test-compile -Doptimize=ReleaseSafe
+      - name: Run headless correctness tests
+        run: zig build test -Doptimize=ReleaseSafe
+      # GUI and foreign-target runs require separate runtime validation.
+
+      - name: Compile independent DVUI app without ZData imports
+        run: zig build minimal -Doptimize=ReleaseSafe

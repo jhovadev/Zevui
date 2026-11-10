@@ -1,0 +1,21 @@
+.{
+    .name = .zdata_dvui_examples,
+    .version = "0.1.0",
+    .fingerprint = 0x525d57945f45ed28,
+    .minimum_zig_version = "0.17.1",
+    .dependencies = .{
+        // Same pinned DVUI source and content hash as dvui-demo (9 Nov 2026).
+        .dvui = .{
+            .url = "git+https://github.com/david-vanderson/dvui?ref=main#4ed19f847fd0ec6ec97f9600316d86c0e0cd255c",
+            .hash = "dvui-0.6.0-dev-AQFJmaGoBAG4gedKz36Pkv4RuRs86V5BjXavPsYijdkp",
+        },
+        // Install the public ZData SDK once with:
+        // zig fetch --save=zdata git+https://github.com/jhovadev/zigdataengine.git
+        // Zig records the commit URL and package content hash here.
+        .zdata = .{
+            .url = "git+https://github.com/jhovadev/zigdataengine.git#05d123cd4707a20e036234cb4184a027409beaf3",
+            .hash = "zig_data_engine-0.1.0-lZlI_dLgBgA9ymVJUScsfjsf6ugqAFnsPTocOlHeZODE",
+        },
+    },
+    .paths = .{""},
+}

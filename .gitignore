@@ -1,0 +1,36 @@
+.zig-cache/
+zig-pkg/
+zig-cache/
+zig-out/
+*.exe
+*.pdb
+*.csv.tmp
+*.bak
+*.log
+.DS_Store
+.idea/
+.vscode/
+# Keep only intentional small fixtures under testdata/.
+
+# Target-specific installation prefixes (just cross <target>).
+dist/
+
+# Python tooling.
+__pycache__/
+*.py[cod]
+
+# Local CSV and benchmark measurements in repository root; keep synthetic
+# testdata/*.csv fixtures versioned deliberately.
+/*.csv
+/*.meta.json
+
+# SolidStart / Bun Initializr UI
+apps/initializr/node_modules/
+apps/initializr/.output/
+apps/initializr/.vinxi/
+apps/initializr/.nitro/
+apps/initializr/.vite/
+apps/initializr/dist/
+
+# Pure TypeScript planner build outputs
+packages/initializr-core/dist/

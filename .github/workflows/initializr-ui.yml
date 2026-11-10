@@ -1,0 +1,54 @@
+name: Initializr SolidStart
+on:
+  push:
+    paths:
+      - 'apps/initializr/**'
+      - 'initializr/**'
+      - 'registry/**'
+      - 'packages/initializr-core/**'
+      - 'addons/**'
+      - 'tests/test_initializr*.py'
+      - '.github/workflows/initializr-ui.yml'
+  pull_request:
+    paths:
+      - 'apps/initializr/**'
+      - 'initializr/**'
+      - 'registry/**'
+      - 'packages/initializr-core/**'
+      - 'addons/**'
+      - 'tests/test_initializr*.py'
+      - '.github/workflows/initializr-ui.yml'
+jobs:
+  initializr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: oven-sh/setup-bun@v2
+      - name: Python generator and bridge
+        run: python3 -m unittest discover -s tests -p 'test_initializr*.py' -v
+      - name: Install JS dependencies
+        working-directory: apps/initializr
+        run: bun install
+      - name: Validate registry, planner and ZIP parity
+        run: |
+          apps/initializr/node_modules/.bin/tsc -p packages/initializr-core/tsconfig.json
+          node --test packages/initializr-core/tests/*.test.mjs
+          python3 -m unittest discover -s tests -p 'test_registry*.py' -v
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: '0.17.1'
+      - name: Build generated native Zig starters
+        run: |
+          python3 -m initializr.cli z0-minimal --output /tmp
+          python3 -m initializr.cli z0-addons --addon memory_store --addon design_tokens --output /tmp
+          (cd /tmp/z0-minimal && zig build test -Doptimize=ReleaseSafe && zig build -Doptimize=ReleaseSafe)
+          (cd /tmp/z0-addons && zig build test -Doptimize=ReleaseSafe && zig build -Doptimize=ReleaseSafe)
+      - name: Typecheck SolidStart
+        working-directory: apps/initializr
+        run: bun run typecheck
+      - name: Build SolidStart
+        working-directory: apps/initializr
+        run: bun run build

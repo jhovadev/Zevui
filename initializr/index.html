@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zevui Initializr · Zig native projects</title><link rel="stylesheet" href="/static/style.css"></head>
+<body>
+  <header class="top"><div class="mark">Z</div><div><strong>Zevui <span class="sub">Initializr</span></strong><small>Native Zig project generator · DVUI + SDL3</small></div><span class="version">Zig 0.17.1</span></header>
+  <main>
+    <section class="intro"><div class="eyebrow">PROJECT GENERATOR</div><h1>From an idea to a<br><em>native Zig app.</em></h1><p>Choose your metadata and addons. Get a complete DVUI application that builds with <code>zig build</code>. No runtime, no webview, no CLI lock-in.</p></section>
+    <form id="form" class="layout">
+      <section class="panel"><div class="panel-title"><span class="step">01</span><div><h2>Project identity</h2><p>Everything editable later in zevui.zon</p></div></div>
+        <label>Project name<input id="name" value="my-zevui-app" maxlength="32" pattern="[a-z][a-z0-9_-]{1,31}" required><small>Lowercase Zig package / output binary name</small></label>
+        <label>Display title<input id="title" value="My Zevui App" maxlength="80" required></label>
+        <div class="two"><label>Organization<input id="organization" value="dev.example" required></label><label>Version<input id="version" value="0.1.0" required></label></div>
+        <div class="preview"><span>APPLICATION</span><strong id="preview-title">My Zevui App</strong><code id="preview-id">dev.example.my-zevui-app</code></div>
+      </section>
+      <section class="panel"><div class="panel-title"><span class="step">02</span><div><h2>Addons</h2><p>Only selected modules appear in source</p></div></div><div id="addons" class="addons" aria-live="polite"></div></section>
+      <section class="panel output"><div class="panel-title"><span class="step">03</span><div><h2>Generate</h2><p>Starter ready for Linux, Windows and macOS builds</p></div></div><div class="terminal"><span>› zig build</span><span>› zig build run</span><span>› zig build -Dportable-gui=true</span></div><button id="generate" type="submit">Generate project ZIP <span>↗</span></button><p id="status" role="status" aria-live="polite">All generated projects include a typed Build Core and the pinned DVUI dependency.</p></section>
+    </form>
+  </main>
+  <footer><span>Unofficial DVUI starter by Zevui · Local-first generator</span><span>No accounts · No telemetry</span></footer>
+  <script src="/static/app.js" defer></script>
+</body></html>

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zevui.dev/schemas/registry-v2.json",
+  "title": "Zevui Addon Registry v2",
+  "type": "object",
+  "required": ["schemaVersion", "registryVersion", "zig", "supportedZig", "framework", "packages", "addons"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": 2 },
+    "registryVersion": { "type": "string" },
+    "zig": { "type": "string" },
+    "supportedZig": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "framework": { "type": "string" },
+    "packages": {
+      "type": "object", "required": ["dvui"],
+      "additionalProperties": { "$ref": "#/$defs/package" }
+    },
+    "addons": { "type": "array", "items": { "$ref": "#/$defs/addon" }, "minItems": 1 }
+  },
+  "$defs": {
+    "package": {
+      "type": "object", "additionalProperties": false, "required": ["url", "hash"],
+      "properties": { "url": { "type": "string" }, "hash": { "type": "string" } }
+    },
+    "file": {
+      "type": "object", "additionalProperties": false, "required": ["from", "to"],
+      "properties": { "from": { "type": "string" }, "to": { "type": "string" } }
+    },
+    "addon": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "name", "category", "description", "status", "default", "kind", "requires", "conflicts", "targets", "zig", "zevui", "trust", "license", "files"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_-]+$" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "enum": ["available", "manual", "planned"] },
+        "default": { "type": "boolean" },
+        "kind": { "enum": ["zig", "c-bundled", "c-system", "planned"] },
+        "requires": { "type": "array", "items": { "type": "string" } },
+        "conflicts": { "type": "array", "items": { "type": "string" } },
+        "targets": { "type": "array", "items": { "enum": ["linux", "windows", "macos"] } },
+        "zig": { "type": "array", "items": { "type": "string" } },
+        "zevui": { "type": "string" },
+        "trust": { "enum": ["official", "verified", "community"] },
+        "license": { "type": "string" },
+        "files": { "type": "array", "items": { "$ref": "#/$defs/file" } }
+      }
+    }
+  }
+}

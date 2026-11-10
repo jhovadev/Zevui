@@ -1,0 +1,15 @@
+.{
+    .identity = .{
+        .name = "zevui-csv-explorer",
+        .title = "Zevui | CSV Explorer",
+        .display_name = "Zevui CSV Explorer",
+        .short_name = "ZEVUI",
+        .screen_name = "CSV Explorer",
+        .version = "0.5.0-dev",
+        .organization = "dev.jhovadev",
+        .application = "zevui-csv-explorer",
+    },
+    .window = .{ .width = 1390, .height = 840, .min_width = 780, .min_height = 520 },
+    .appearance = .{ .theme = "graphite", .accent = "lavender", .density = "compact" },
+    .modules = .{ .zdata = true },
+}

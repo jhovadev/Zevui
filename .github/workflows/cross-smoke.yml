@@ -1,0 +1,41 @@
+name: Cross-target compile (experimental)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Zig desktop target (not a release support claim)'
+        required: true
+        type: choice
+        options:
+          - x86_64-linux-gnu
+          - aarch64-linux-gnu
+          - x86_64-windows-gnu
+          - aarch64-windows-gnu
+      gui_build:
+        description: 'Attempt full DVUI/SDL3 build as well (may need toolchain support)'
+        type: boolean
+        default: false
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: 0.17.1
+      - name: Check target contract
+        run: python3 scripts/targets.py '${{ inputs.target }}'
+      - name: Compile headless test binaries for target (never execute)
+        run: zig build test-compile -Dtarget='${{ inputs.target }}' -Doptimize=ReleaseSafe
+      - name: Attempt optional GUI cross build
+        if: ${{ inputs.gui_build }}
+        run: python3 scripts/sdk_doctor.py --target '${{ inputs.target }}' --require-build && zig build -Dtarget='${{ inputs.target }}' -Dportable-gui=true -Doptimize=ReleaseFast --prefix 'dist/${{ inputs.target }}'
+      - name: Archive compiled GUI executable (NOT a release)
+        if: ${{ inputs.gui_build }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: experimental-${{ inputs.target }}
+          path: dist/${{ inputs.target }}/bin/
+          if-no-files-found: error
