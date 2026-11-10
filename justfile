@@ -188,3 +188,16 @@ set positional-arguments := true
 # Verify published addon pin on demand (requires network); never fabricate hashes.
 @pin-addon id url:
     python3 tools/pin_addon.py "$1" --url "$2" --write
+
+# F6A experimental package: opt-in, independent from framework and F5 initializr.
+# `bundled` requires a separate, verified one-time vendor bootstrap.
+@sqlite-addon-check:
+    cd addons/storage-sqlite && zig build test -Dsqlite=off -Doptimize=ReleaseSafe
+    cd addons/storage-sqlite && zig build test -Dsqlite=system -Doptimize=ReleaseSafe
+
+@sqlite-vendor:
+    python3 addons/storage-sqlite/tools/vendor_sqlite.py
+
+@sqlite-bundled-check:
+    python3 addons/storage-sqlite/tools/vendor_sqlite.py --check
+    cd addons/storage-sqlite && zig build test -Dsqlite=bundled -Doptimize=ReleaseSafe
