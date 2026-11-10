@@ -5,7 +5,7 @@ not verify that a browser successfully hydrates the server HTML.
 
 1. Apply the hotfix to M0.7 and run `just initializr` in a fresh tab.
 2. If the error remains, run `just initializr-csr`. This disables HTML SSR
-   **for diagnosis**, not for deployment. The Node API and Python bridge remain.
+   **for diagnosis**, not for deployment. The Node API and TypeScript generator remain.
 3. Compare clean-session results, disable browser extensions, and check the
    first browser console exception before the hydration mismatch.
 4. Re-enable SSR for the product once a browser test covers the initial route.

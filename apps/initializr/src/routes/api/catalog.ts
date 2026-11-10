@@ -1,5 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
-import { readCatalog } from "../../lib/bridge.server";
+import { readCatalog } from "../../lib/generator.server";
 
 export async function GET(_event: APIEvent) {
   try {

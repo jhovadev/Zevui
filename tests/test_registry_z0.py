@@ -7,7 +7,7 @@ import sys
 import unittest
 import zipfile
 from pathlib import Path
-from initializr.generator import ROOT, CATALOG, InputError, archive, contents, validate
+from tests.legacy_oracle.generator import ROOT, CATALOG, InputError, archive, contents, validate
 
 
 class RegistryContracts(unittest.TestCase):
@@ -76,9 +76,11 @@ console.log(JSON.stringify(planProject(JSON.parse(process.argv[1]), r)));
         self.assertIn('plan-file-list', ui)
         self.assertTrue((ROOT/'apps/initializr/src/routes/api/metadata.ts').exists())
         self.assertTrue((ROOT/'apps/initializr/src/routes/api/plan.ts').exists())
-        bridge = (ROOT/'apps/initializr/src/lib/bridge.server.ts').read_text()
+        bridge = (ROOT/'apps/initializr/src/lib/generator.server.ts').read_text()
         self.assertIn('registry/catalog.json', bridge)
-        self.assertIn('initializr.bridge', bridge)
+        self.assertNotIn('initializr.bridge', bridge)
+        self.assertIn('generateFiles(', bridge)
+        self.assertIn('zipProject(', bridge)
 
 if __name__ == '__main__':
     unittest.main()

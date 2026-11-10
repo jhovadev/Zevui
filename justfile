@@ -139,16 +139,16 @@ set positional-arguments := true
 @initializr-build:
     cd apps/initializr && bun run typecheck && bun run build
 
-# Optional Python-only legacy UI; same generator, no Node/Bun required.
-@initializr-legacy:
-    python3 -m initializr
+# Generate a Zig project using the same TypeScript engine as the web route.
+# Exported recipe parameter prevents shell interpolation and command injection.
+@new $name:
+    apps/initializr/node_modules/.bin/tsc -p packages/initializr-core/tsconfig.json
+    node packages/initializr-core/scripts/new.mjs "$name"
 
-# Generate a standalone Zig project; no Python required to BUILD the result.
-@new name:
-    python3 -m initializr.cli "{{name}}"
-
-# Initializr bridge, generator and frontend contract tests.
+# Production TS generator tests plus frozen Python output-oracle tests.
 @initializr-check:
+    apps/initializr/node_modules/.bin/tsc -p packages/initializr-core/tsconfig.json
+    node --test packages/initializr-core/tests/generator.test.mjs
     python3 -m unittest discover -s tests -p 'test_initializr*.py' -v
 
 # Verify registry schema, pure planner and its deterministic Zig project plan.
@@ -158,7 +158,7 @@ set positional-arguments := true
     node --test packages/initializr-core/tests/*.test.mjs
     python3 -m unittest discover -s tests -p 'test_registry*.py' -v
 
-# Run registry tests plus the existing Initializr generator checks.
+# Run registry, deterministic ZIP, CLI and historical oracle tests.
 @ecosystem-check:
     just registry-check
     just initializr-check

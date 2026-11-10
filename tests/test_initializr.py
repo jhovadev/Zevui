@@ -6,7 +6,7 @@ import unittest
 import zipfile
 import zlib
 from pathlib import Path
-from initializr.generator import CATALOG, InputError, archive, contents, create_directory, validate
+from tests.legacy_oracle.generator import CATALOG, InputError, archive, contents, create_directory, validate
 
 
 class InitializrTests(unittest.TestCase):

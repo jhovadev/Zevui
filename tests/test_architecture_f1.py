@@ -40,12 +40,14 @@ class ArchitectureF1Tests(unittest.TestCase):
         self.assertTrue((ROOT / "zevui.windows.zon").is_file())
         self.assertTrue((ROOT / "zevui.macos.zon").is_file())
 
-    def test_generator_duality_is_documented_until_f2(self):
-        self.assertTrue((ROOT / "packages/initializr-core/src/index.ts").is_file())
-        self.assertTrue((ROOT / "initializr/generator.py").is_file())
-        self.assertTrue((ROOT / "initializr/bridge.py").is_file())
-        doc = (ROOT / "docs/architecture/f1-freeze.md").read_text()
-        self.assertIn("único ejecutor TS", doc)
+    def test_f2_has_only_ts_generator_in_production(self):
+        self.assertTrue((ROOT / "packages/initializr-core/src/generator.ts").is_file())
+        self.assertTrue((ROOT / "tests/legacy_oracle/generator.py").is_file())
+        self.assertFalse((ROOT / "initializr/generator.py").exists())
+        self.assertFalse((ROOT / "apps/initializr/src/lib/bridge.server.ts").exists())
+        api = (ROOT / "apps/initializr/src/lib/generator.server.ts").read_text()
+        self.assertNotIn("child_process", api)
+        self.assertIn("generateFiles(", api)
 
     def test_generated_artifacts_are_ignored(self):
         ignore = (ROOT / ".gitignore").read_text().splitlines()

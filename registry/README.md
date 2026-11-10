@@ -12,4 +12,4 @@ The registry is an **official, curated catalog** initially. Its only selectable 
 4. Run `just ecosystem-check` and `just check`. On CI, generate an empty starter and a starter with all available addons, then compile on Zig 0.17.1.
 5. Require a source review for any C build integration, bindgen/translate-c, or build script. A hash prevents undetected changes; it is not a security audit.
 
-A third-party/community addon submission process, a truly independently published `@import("zevui")` package and a single TS ZIP executor are not yet shipped. The legacy Python generator deliberately remains as the verified executor until output parity is demonstrated.
+A third-party/community addon submission process, a truly independently published `@import("zevui")` package and separately pinned Zig addon packages are not yet shipped. F2 uses a single TS ZIP executor; legacy Python is retained as a test oracle.

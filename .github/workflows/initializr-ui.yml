@@ -4,6 +4,8 @@ on:
     paths:
       - 'apps/initializr/**'
       - 'initializr/**'
+      - 'tests/legacy_oracle/**'
+      - 'tests/fixtures/**'
       - 'registry/**'
       - 'packages/initializr-core/**'
       - 'addons/**'
@@ -13,6 +15,8 @@ on:
     paths:
       - 'apps/initializr/**'
       - 'initializr/**'
+      - 'tests/legacy_oracle/**'
+      - 'tests/fixtures/**'
       - 'registry/**'
       - 'packages/initializr-core/**'
       - 'addons/**'
@@ -27,8 +31,6 @@ jobs:
         with:
           node-version: '24'
       - uses: oven-sh/setup-bun@v2
-      - name: Python generator and bridge
-        run: python3 -m unittest discover -s tests -p 'test_initializr*.py' -v
       - name: Install JS dependencies
         working-directory: apps/initializr
         run: bun install
@@ -37,13 +39,14 @@ jobs:
           apps/initializr/node_modules/.bin/tsc -p packages/initializr-core/tsconfig.json
           node --test packages/initializr-core/tests/*.test.mjs
           python3 -m unittest discover -s tests -p 'test_registry*.py' -v
+          python3 -m unittest discover -s tests -p 'test_initializr*.py' -v
       - uses: mlugg/setup-zig@v2
         with:
           version: '0.17.1'
       - name: Build generated native Zig starters
         run: |
-          python3 -m initializr.cli z0-minimal --output /tmp
-          python3 -m initializr.cli z0-addons --addon memory_store --addon design_tokens --output /tmp
+          node packages/initializr-core/scripts/new.mjs z0-minimal --output /tmp
+          node packages/initializr-core/scripts/new.mjs z0-addons --addon memory_store --addon design_tokens --output /tmp
           (cd /tmp/z0-minimal && zig build test -Doptimize=ReleaseSafe && zig build -Doptimize=ReleaseSafe)
           (cd /tmp/z0-addons && zig build test -Doptimize=ReleaseSafe && zig build -Doptimize=ReleaseSafe)
       - name: Typecheck SolidStart

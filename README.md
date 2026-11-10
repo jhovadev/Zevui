@@ -4,47 +4,49 @@
 
 Zevui is an **unofficial, example-driven template**, not a replacement for DVUI or a component of ZData. Its first application, **CSV Explorer**, is a small but usable data viewer: a compact grid, on-demand search, column tools, and a multi-theme design system.
 
-> **Status:** Z0 registry + independent planner (after M0.7.1) · **Zig 0.17.1** · native desktop UI · MIT. Linux x86-64 has been exercised by the project author; other cross-build targets need target-host validation. Names and APIs are subject to change.
+> **Status:** F2 single TypeScript generator (after Z0/F1) · **Zig 0.17.1** · native desktop UI · MIT. Linux x86-64 has been exercised by the project author; other cross-build targets need target-host validation. Names and APIs are subject to change.
 
 ## Zevui Initializr — generate your own Zig app
 
 Zevui now includes a local, Spring Initializr-style project generator with an addon catalog. It produces self-contained Zig sources from selected features, with native DVUI/SDL3 and a typed `zevui.zon` configuration. **The generated app needs no Python or Zevui CLI to compile.**
 
 ```sh
-# Node.js 24+ and Bun are required only for the SolidStart generator website.
-just initializr           # installs JS dependencies on first run, then serves 127.0.0.1:8765
-just initializr-check     # Python generator/bridge contract tests
-just initializr-build     # typecheck + production build (after setup)
+# Node.js 24+ and Bun are used only by the Initializr website.
+just initializr-setup
+just initializr          # SolidStart + deterministic TypeScript ZIP executor
+just initializr-check    # TS executor tests + frozen Python output oracle
+just initializr-build    # SolidStart typecheck and production build
 
-# Python-only alternatives, no Node/Bun:
-just initializr-legacy    # previous local UI on port 8765
-python3 -m initializr.cli my-application --addon memory_store --addon design_tokens
+# CLI uses exactly the same TypeScript project renderer as the website.
+just new my-application
 cd my-application && zig build run
 ```
 
-Z0 adds a reviewed [addon registry](registry/README.md) and a pure TypeScript
-[project planner](packages/initializr-core/src/index.ts). The SolidStart UI now
-supports file-tree previews and shared configuration URLs. The project ZIP is
-still emitted by the Python generator; the planner and ZIP executor have explicit
-parity tests and are not yet a single execution engine.
+F2 introduces a **single production generator** in
+[`packages/initializr-core/src/generator.ts`](packages/initializr-core/src/generator.ts).
+It is framework-independent: the pure planner, renderer and deterministic ZIP
+encoder have no Node, browser or filesystem imports. SolidStart reads reviewed
+source files and returns a ZIP; the Node CLI writes the same generated files to
+disk. Python moved to [`tests/legacy_oracle/`](tests/legacy_oracle/) for regression
+comparisons only; it is not needed to run Initializr or to build generated apps.
 
 ```sh
-just registry-check     # pure planner + official registry verification
-just ecosystem-check    # plus legacy ZIP generator contract tests
+just registry-check      # planner, registry, deterministic generator
+just ecosystem-check     # TS + frozen oracle regression gates
 ```
 
-Read [Z0 ecosystem design and APIs](docs/ecosystem-z0.md).
+The browser still provides project metadata, addon filtering, shared URLs and a
+file-tree preview based on the very same plan used to generate the ZIP.
+Supported addons are `memory_store` and `design_tokens`. SQLite, tray, bundle and
+ZData are registered as non-ready. See [F2 migration details](docs/architecture/f2-generator.md)
+and [Initializr documentation](docs/initializr.md).
 
-**Monorepo migration:** [F0 current-state audit](docs/architecture/current-state.md),
-[F1 baseline and acceptance gates](docs/architecture/f1-freeze.md),
+**Monorepo migration:** [F0 audit](docs/architecture/current-state.md),
+[F1 freeze](docs/architecture/f1-freeze.md),
+[F2 acceptance](docs/architecture/f2-generator.md),
 [target architecture](docs/architecture/target-architecture.md), and
-[F1–F6 migration roadmap](docs/architecture/migration-roadmap.md). The ADRs
-under [`docs/adr/`](docs/adr/) remain *proposed*; no source paths have moved.
-
-
-The web UI lives in [`apps/initializr/`](apps/initializr/) and has SolidStart API routes at `/api/catalog`, `/api/metadata`, `/api/plan` and `/api/generate`. Generation remains in [`initializr/generator.py`](initializr/generator.py), called through [`initializr/bridge.py`](initializr/bridge.py) (bounded stdin JSON → binary ZIP). **SolidStart is for developer tooling only; it is not embedded in generated DVUI desktop apps.**
-
-Supported generated addons: `memory_store` (bounded volatile KV) and `design_tokens` (pure Zig multitheme tokens). SQLite, tray, bundle and ZData appear in the catalog with explicit non-ready statuses. See [Initializr architecture](docs/initializr.md).
+[F1–F6 roadmap](docs/architecture/migration-roadmap.md). The five ADRs remain
+proposed; physical extraction of `framework/` and `examples/csv-explorer/` is F3.
 
 ## Why this template?
 

@@ -4,34 +4,54 @@
 
 ## Run locally
 
-The generator website is now **SolidStart 2.x + SolidJS** with a Node-compatible Nitro server. Requires **Node.js 24+** and **Bun**, alongside Python 3 (standard library only) for the actual ZIP generation; Zig 0.17.1 is needed only when building the downloaded desktop project.
+The generator website uses **SolidStart 2.2.2 + SolidJS**, Node.js 24+ and
+Bun. **Python is not part of the production generator**. The CLI uses Node.js
+and TypeScript output; generated desktop projects require only Zig 0.17.1 and
+the native SDK requirements of DVUI/SDL3.
 
 ```sh
-just initializr            # first run installs JS dependencies; http://127.0.0.1:8765
-just initializr-setup      # explicit install/update
-just initializr-check      # Python generator and bridge tests
-just initializr-build      # typecheck + production build
+just initializr-setup
+just initializr
+just registry-check
+just ecosystem-check
+just initializr-build
+just new my-app
 ```
 
-For a Python-only, zero-JS-toolchain workflow use `just initializr-legacy`. The CLI remains `python3 -m initializr.cli example-name`. Python's legacy HTTP server now suppresses its `KeyboardInterrupt` traceback; stopping `just` with Ctrl+C is a normal user interruption, and Just may still report signal 2.
-
-### How the new frontend works
+### Architecture (F2)
 
 ```text
-apps/initializr/src/routes/index.tsx         SolidStart page: forms, catalog and project preview
-apps/initializr/src/routes/api/catalog.ts    GET /api/catalog (reads canonical JSON)
-apps/initializr/src/routes/api/generate.ts   POST /api/generate -> ZIP
-apps/initializr/src/lib/bridge.server.ts     Node subprocess bridge, Python stdlib
-initializr/bridge.py                        Stdin JSON -> stdout ZIP (16 KiB input bound)
-initializr/generator.py                     Canonical validation and Zig source generation
-initializr/catalog.json                    Catalog status and metadata single source
+registry/catalog.json                reviewed addon data + pinned DVUI URL/hash
+packages/initializr-core/src/index.ts      pure planProject()
+packages/initializr-core/src/generator.ts  pure TS render + ZIP (STORE)
+                         |                        |
+apps/initializr/ SolidStart website   packages/initializr-core/scripts/new.mjs
+                         |                        |
+          API /api/generate             local disk writer
+                         \________________________/
+                               zig build
 ```
 
-No second Python HTTP server needs to run. The Node API starts a fixed `python3 -m initializr.bridge` child process for each generation request; JSON input is validated by the canonical generator. The browser never receives or executes arbitrary shell commands. Generated ZIPs contain source only. Both API endpoints use same-origin requests and no cross-origin CORS permissions. Vite's development server binds to loopback. **Do not expose the Initializr API directly to the public internet** without adding authentication/rate limiting and deployment hardening. The backend uses a Node runtime with local Python and access to the repository; do not deploy it as a static site or on an edge runtime.
+- `/api/metadata` and `/api/catalog` return the registry; `/api/plan` returns
+  the pure file plan; `/api/generate` returns a ZIP built from that same plan.
+- `apps/initializr/src/lib/generator.server.ts` only reads reviewed local
+  sources and passes them into the pure TS executor. It **does not** use
+  `child_process` or Python. Existing routes retain JSON input size limits,
+  same-origin protections and no-store ZIP responses.
+- The ZIP encoder uses method 0 (STORE) intentionally: fixed file ordering,
+  DOS date 2026-01-01, normalized permissions and LF content. ZIPs may be
+  larger than the old Python-deflated archives, but are reproducible without
+  a compression dependency.
+- The previous Python generator and HTTP/CLI bridge live exclusively under
+  `tests/legacy_oracle/` and are **never imported by production code**.
+  Frozen SHA-256 goldens allow parity checks without invoking Python at runtime.
+- **No remote deployment hardening is claimed.** A public server needs rate
+  limits, appropriate security headers and resource monitoring. The server
+  adapter uses filesystem access, so deploy to a Node-compatible host with
+  the registry and reviewed sources available; not as static-only hosting.
 
-### Build/deployment limitations
-
-This delivery cannot install JS packages in the artifact environment (package registry network unavailable), so SolidStart typechecking, server startup, and browser E2E are **pending validation on Node 24 / Bun**. `package.json` pins SolidStart 2.2.2 and Nitro 3.0.261103-rc (Nitro v3 is still prerelease), but no `bun.lock` has been generated here; after the first `just initializr-setup`, commit the lockfile for reproducibility. To run a built Nitro server, retain the Python `initializr/` package and `zevui/`, Zig example/template sources, and `build.zig.zon`; set `ZEVUI_REPO_ROOT` to their common directory. The working directory default assumes execution from `apps/initializr`.
+Node.js and SolidStart are developer-tooling dependencies only, never runtime
+requirements of the generated native application.
 
 ## Generated project
 
@@ -67,4 +87,4 @@ The DVUI SDL3 package dependency is inherited from the M0.5 manifest and cross-c
 
 ## Z0 registry and pure planner
 
-The registry is now `registry/catalog.json` (schema v2). A pure TypeScript planner in `packages/initializr-core` computes the safe, deterministic file plan consumed by the SolidStart preview. The Python ZIP generator continues as the final validated executor while test-driven parity is established. See [Z0 ecosystem architecture](ecosystem-z0.md).
+The registry is `registry/catalog.json` (schema v2). Its TypeScript planner and deterministic ZIP executor share a validated plan. Python survives only as a frozen test oracle. See [F2 architecture](architecture/f2-generator.md).

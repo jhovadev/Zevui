@@ -1,5 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
-import { readCatalog } from "../../lib/bridge.server";
+import { readCatalog } from "../../lib/generator.server";
 import { planProject, PlanError } from "../../../../../packages/initializr-core/src/index.js";
 import type { ProjectInput } from "../../../../../packages/initializr-core/src/index.js";
 

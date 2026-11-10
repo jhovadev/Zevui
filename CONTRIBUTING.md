@@ -32,7 +32,7 @@ package must not depend on `../zig-data-engine` or on an unspecified branch.
 
 ## Initializr UI (SolidStart)
 
-For the project generator use Node.js 24+, Bun, and Python 3. Run `just initializr-setup`, then `just initializr`. The authoritative generator stays in `initializr/generator.py`; do not fork its validation into browser-only logic. Add a Python contract test for generated code/archives whenever changing addon features. Before opening a PR, run `just initializr-check` and (with JS dependencies installed) `just initializr-build`. Do not commit `apps/initializr/node_modules` or generated build outputs.
+For the generator website use Node.js 24+ and Bun; no Python is needed in production. Run `just initializr-setup`, then `just initializr`. The authoritative renderer and ZIP executor live in `packages/initializr-core/src/generator.ts` alongside the pure planner. Do not duplicate validation in the browser or in server routes. Update TypeScript golden tests whenever changing generated files and keep the old Python oracle under `tests/legacy_oracle/` for regression comparison only. Before a PR, run `just initializr-check` and `just initializr-build`. Do not commit `apps/initializr/node_modules` or generated build outputs.
 
 ### Addons and registry
 
@@ -51,3 +51,11 @@ Run `python3 -m unittest discover -s tests -v` as part of `just check`: it
 includes `tests/test_architecture_f1.py`. Update the F1 assertions as part
 of the **same PR** that moves or replaces a documented API. Preserve
 `zevui.zon` public keys and the Windows GUI subsystem/debug override.
+
+### F2 Initializr generator
+
+The production generator is TypeScript only. Changes to rendering require
+`just registry-check` and `just ecosystem-check`, plus the frozen oracle
+SHA-256 fixtures (`tests/fixtures/initializr-f2-golden.json`). Do not wire
+`tests/legacy_oracle/` into any API or CLI route. The next structural phase
+(F3) will extract the Zig framework package independently.

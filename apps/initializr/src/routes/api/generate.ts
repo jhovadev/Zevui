@@ -1,5 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
-import { GeneratorError, generateProject } from "../../lib/bridge.server";
+import { GeneratorError, PlanError, generateProject } from "../../lib/generator.server";
 
 const MAX_BODY = 16 * 1024;
 async function readLimited(request: Request): Promise<string> {
@@ -32,10 +32,10 @@ export async function POST({ request }: APIEvent) {
     const payload: unknown = JSON.parse(body);
     if (!payload || typeof payload !== "object" || Array.isArray(payload)) throw new GeneratorError("Invalid project object", 400);
     const project = payload as Record<string, unknown>;
-    // Python owns final validation; this guard only creates a safe download filename.
+    // The shared TypeScript planner validates the same spec used by the preview.
     const safeName = typeof project.name === "string" && /^[a-z][a-z0-9_-]{1,31}$/.test(project.name)
       ? project.name : "zevui-app";
-    const result = await generateProject(body);
+    const result = await generateProject(payload);
     return new Response(result as BodyInit, {
       headers: {
         "Content-Type": "application/zip",
@@ -46,7 +46,7 @@ export async function POST({ request }: APIEvent) {
       },
     });
   } catch (err) {
-    const status = err instanceof GeneratorError ? err.status : err instanceof SyntaxError || err instanceof TypeError ? 400 : 500;
+    const status = err instanceof GeneratorError ? err.status : err instanceof PlanError || err instanceof SyntaxError || err instanceof TypeError ? 400 : 500;
     return Response.json({ error: status === 500 ? "Unexpected generation error" : err instanceof Error ? err.message : "Bad request" }, { status, headers: { "Cache-Control": "no-store" } });
   }
 }

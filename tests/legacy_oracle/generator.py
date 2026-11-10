@@ -15,7 +15,7 @@ import zipfile
 import zlib
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 CATALOG = json.loads((ROOT / 'registry/catalog.json').read_text())
 AVAILABLE = frozenset(a['id'] for a in CATALOG['addons'] if a['status'] == 'available')
 NAME = re.compile(r'^[a-z][a-z0-9_-]{1,31}$')

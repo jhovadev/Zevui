@@ -1,0 +1,70 @@
+{
+  "minimal": {
+    "project": {
+      "name": "z0-minimal",
+      "title": "Zevui Minimal",
+      "organization": "dev.example",
+      "version": "0.1.0",
+      "addons": [],
+      "fingerprintId": 123456789
+    },
+    "files": {
+      ".gitignore": "22362bbb89e2a2f33ebae32319c19783437c9a91e15bc8db663daaba83b79296",
+      "README.md": "41f9515c6007216861c9a45cf208276d029c1da9e337694bc640566c6cd22bb3",
+      "build.zig": "3a869b18925734ae87515279f96cd94f1f1ce08c2f0d916cf4995fae40d8c41e",
+      "build.zig.zon": "2b298dc1371daa8e4711119a1f7d0850f333e215d9377c4c204ceb70f93385ea",
+      "src/main.zig": "b2847fc89add7584c9bca84eb14350ac77f2daa8cfde385fd5883b7544c2dba4",
+      "zevui.zon": "d5b0fa1af50e7b42ee6d648c36836794b531fd0a66da0861592fbb70d74b1a10",
+      "zevui/build.zig": "8dc0f120ee4d250b9e5132f7567328028ad6185809c3338e149e39d709d335e3",
+      "zevui/config.zig": "c481df7594acdbff002b964e83065bef025b7f7bc0083bd0c355c3bea3929f21"
+    }
+  },
+  "addons": {
+    "project": {
+      "name": "z0-addons",
+      "title": "Zevui Addons",
+      "organization": "dev.jhovadev",
+      "version": "0.1.0",
+      "addons": [
+        "memory_store",
+        "design_tokens"
+      ],
+      "fingerprintId": 305419896
+    },
+    "files": {
+      ".gitignore": "22362bbb89e2a2f33ebae32319c19783437c9a91e15bc8db663daaba83b79296",
+      "README.md": "c9309418d61280fa55ab1f0cff2f4347633d012024aa637efa95a34925eef10d",
+      "build.zig": "8ec7d823be7616216c77e23f6e7df86e155d360af7068280f8f6d21ebd2486bf",
+      "build.zig.zon": "757b1b090986f0a6e99b43d88778914aeb8188c9bad9bf4331372c21febab6e4",
+      "src/addons/design_tokens.zig": "39ec9a216aaa05d1e566a4661866ff637afca6c6c98f919c511d7f6393e6108a",
+      "src/addons/memory_store.zig": "29869fbe1e4aa020daa2b72246a0bce03b071a1558a01fb59120747e7009ae26",
+      "src/main.zig": "b68e035948ff33bc163258615f82205a36a39da6383d7173101acfe8d31eae41",
+      "zevui.zon": "34d37847092fbf8d5a611e22cad44d03f8b1ad649a4d6f816a2fbc57d0c5cd55",
+      "zevui/build.zig": "8dc0f120ee4d250b9e5132f7567328028ad6185809c3338e149e39d709d335e3",
+      "zevui/config.zig": "c481df7594acdbff002b964e83065bef025b7f7bc0083bd0c355c3bea3929f21"
+    }
+  },
+  "unicode": {
+    "project": {
+      "name": "mi-app",
+      "title": "Aplicación ágil para datos",
+      "organization": "dev.miempresa",
+      "version": "1.2.3",
+      "addons": [
+        "design_tokens"
+      ],
+      "fingerprintId": 5678
+    },
+    "files": {
+      ".gitignore": "22362bbb89e2a2f33ebae32319c19783437c9a91e15bc8db663daaba83b79296",
+      "README.md": "bec2439077d4510f992ce24194a349082107218f5204b732c584106c27c5327e",
+      "build.zig": "c6eeb20032ba9899ba3ab2cb967286e8d32cfd0c12c076ddda022a3494ad78ab",
+      "build.zig.zon": "b1f60e07632caeb2b58d43237b8254bbab99e831a51477cc49880b81cf8e3221",
+      "src/addons/design_tokens.zig": "39ec9a216aaa05d1e566a4661866ff637afca6c6c98f919c511d7f6393e6108a",
+      "src/main.zig": "cee31ee5e0bc9a430f319bcf83fb47cd5d263cf6ef6d24b2ae29a3264f7842f2",
+      "zevui.zon": "7b8c5189b703f0f46c05c7d738c20ff8bfd40037eb6a0531d7890fd0477b3e78",
+      "zevui/build.zig": "8dc0f120ee4d250b9e5132f7567328028ad6185809c3338e149e39d709d335e3",
+      "zevui/config.zig": "c481df7594acdbff002b964e83065bef025b7f7bc0083bd0c355c3bea3929f21"
+    }
+  }
+}
