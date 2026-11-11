@@ -1,0 +1,29 @@
+name: Initializr Production Smoke
+
+# Dispatch only after Vercel reports the production deployment as ready.
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_url:
+        description: 'Deployment origin (default: public Zevui Initializr)'
+        required: false
+        default: 'https://zevui-initializr.vercel.app/'
+
+permissions:
+  contents: read
+
+jobs:
+  http-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Check the smoke harness
+        run: node --test apps/initializr/tests/smoke-production.test.mjs
+      - name: Verify live homepage, catalog, plan and ZIPs
+        env:
+          DEPLOYMENT_URL: ${{ inputs.deployment_url }}
+        run: node apps/initializr/scripts/smoke-production.mjs "$DEPLOYMENT_URL"

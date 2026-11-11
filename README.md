@@ -1,12 +1,27 @@
 # Zevui
 
+[![Initializr on Vercel](https://img.shields.io/badge/Vercel-Open%20Initializr-000000?logo=vercel&logoColor=white)](https://zevui-initializr.vercel.app/)
+[![Zig 0.17.1](https://img.shields.io/badge/Zig-0.17.1-F7A41D?logo=zig&logoColor=white)](https://ziglang.org/)
+
+**[Launch Zevui Initializr](https://zevui-initializr.vercel.app/)** — Create and download a native Zig + DVUI + SDL3 project directly from your browser. SQLite is currently opt-in for Linux.
+
 **An experimental native Zig SDK and desktop starter using [DVUI](https://github.com/david-vanderson/dvui), [SDL3](https://www.libsdl.org/), and [Zig Data Engine (ZData)](https://github.com/jhovadev/zigdataengine).**
 
 Zevui is an **independent community SDK and example-driven template**, not a replacement for DVUI or a component of ZData. Its first application, **CSV Explorer**, is a small but usable data viewer: a compact grid, on-demand search, column tools, and a multi-theme design system.
 
-> **Status:** F3 SDK extraction (after F2/Z0/F1) · **Zig 0.17.1** · native desktop UI · MIT. Linux x86-64 has been exercised by the project author; other cross-build targets need target-host validation. Names and APIs are subject to change.
+> **Status:** F7 Initializr publicly deployed · **Zig 0.17.1** · native desktop UI · MIT. SQLite is validated on Linux; Windows/macOS SQLite targets remain experimental pending native verification. Names and APIs are subject to change.
 
 ## Initializr website deployment
+
+**Live site:** https://zevui-initializr.vercel.app/
+
+Verify the live catalog, API and ZIP downloads (minimal + SQLite) from a computer with internet access:
+
+```sh
+node apps/initializr/scripts/smoke-production.mjs https://zevui-initializr.vercel.app/
+```
+
+This is an HTTP smoke, not a native Zig build or proof of Windows/macOS support.
 
 The SolidStart 2 + Nitro 3 Initializr can be deployed as a **Vercel project connected to this monorepo**. Select repository root (`./`) as Vercel Root Directory; the committed `vercel.json` handles the app-only install and build. The server bundles only reviewed starter sources, and preview/production deployment must be smoke-tested. See [the Vercel deployment guide](docs/architecture/f7-initializr-vercel.md).
 
@@ -41,7 +56,7 @@ just ecosystem-check     # TS + frozen oracle regression gates
 
 The browser still provides project metadata, addon filtering, shared URLs and a
 file-tree preview based on the very same plan used to generate the ZIP.
-Supported addons are `memory_store` and `design_tokens`. SQLite, tray, bundle and
+Supported addons are `memory_store`, `design_tokens`, and Linux-only `sqlite`. Tray, bundle and
 ZData are registered as non-ready. See [F2 migration details](docs/architecture/f2-generator.md)
 and [Initializr documentation](docs/initializr.md).
 
@@ -49,8 +64,7 @@ and [Initializr documentation](docs/initializr.md).
 [F1 freeze](docs/architecture/f1-freeze.md),
 [F2 acceptance](docs/architecture/f2-generator.md),
 [target architecture](docs/architecture/target-architecture.md), and
-[F1–F6 roadmap](docs/architecture/migration-roadmap.md). The five ADRs remain
-proposed; F3 physically extracts `framework/` and `examples/csv-explorer/`, but SDK publication and pinned consumption remain pending F4/F5.
+[F1–F6 roadmap](docs/architecture/migration-roadmap.md). F4 introduced the addon registry, F5 moved the generator to real templates, and F6 added optional SQLite3; external SDK package publication and pinned consumption remain separate work.
 
 ## Why this template?
 

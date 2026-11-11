@@ -37,3 +37,33 @@ The Vercel-specific output format can be tested with `npm --prefix apps/initiali
 - SQLite C vendoring is deliberately **not** part of the generated ZIP, so current ZIPs remain small. Large future addons may need DEFLATE ZIP or object-storage delivery.
 - Server assets are a reviewed allowlist derived from `requiredSources(plan)`. Symlinks, missing source files and traversal are rejected during staging.
 - No actual Vercel deployment is performed by this patch. Configure project access in the Vercel dashboard or CLI.
+
+## Public deployment verification (F7.1)
+
+After Vercel reports a production deployment as ready, run the dependency-free
+Node smoke against the production origin:
+
+```bash
+node apps/initializr/scripts/smoke-production.mjs https://zevui-initializr.vercel.app/
+```
+
+It requests `/`, `/api/metadata`, `/api/catalog`, and POSTs to `/api/plan`
+and `/api/generate`. Both the minimal and Linux SQLite configurations must
+return downloadable ZIPs whose central-directory paths exactly match their
+plans. It also verifies the `mise.toml` pin, required native sources, and
+(optional) metadata ETag revalidation. The script only inspects generated ZIP
+bytes in memory. It neither writes to Vercel storage nor builds generated apps.
+
+Run locally with `node --test apps/initializr/tests/smoke-production.test.mjs`
+before using the live site. The GitHub Actions `Initializr Production Smoke`
+workflow can be dispatched manually after a deployment; it deliberately does
+not run on push to avoid racing against Vercel's asynchronous deployment.
+
+Add `https://zevui-initializr.vercel.app/` in GitHub repository **About → Edit →
+Website**, or run `gh repo edit jhovadev/Zevui --homepage https://zevui-initializr.vercel.app/`
+from an authenticated GitHub CLI. This repository setting is not part of Git
+content and cannot be changed by a patch; do not claim it was updated until
+the owner saves it.
+
+The README's Vercel badge is a static **link to the live Initializr**, not a
+live deployment status indicator. The HTTP smoke provides the real runtime check.
