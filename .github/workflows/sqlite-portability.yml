@@ -4,19 +4,46 @@ name: SQLite native portability (F6C experimental)
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'addons/storage-sqlite/**'
+      - 'packages/initializr-core/**'
+      - 'templates/**'
+      - 'registry/**'
+      - 'justfile'
+      - 'mise.toml'
+      - 'tests/test_architecture_f6*.py'
+      - 'scripts/sqlite_portability_smoke.py'
+      - 'scripts/zig_preflight.py'
+      - '.github/workflows/sqlite-portability.yml'
   pull_request:
     paths:
       - 'addons/storage-sqlite/**'
       - 'packages/initializr-core/**'
       - 'templates/**'
+      - 'registry/**'
+      - 'justfile'
+      - 'mise.toml'
+      - 'tests/test_architecture_f6*.py'
       - 'scripts/sqlite_portability_smoke.py'
+      - 'scripts/zig_preflight.py'
       - '.github/workflows/sqlite-portability.yml'
+
+# The Linux row is blocking; Windows/macOS remain observational until proven.
+permissions:
+  contents: read
+
+concurrency:
+  group: sqlite-portability-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   sqlite-native:
     name: SQLite ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.experimental }}
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -59,11 +86,36 @@ jobs:
       - name: Run native standalone and generated SQLite tests
         shell: bash
         run: >-
-          python scripts/sqlite_portability_smoke.py
+          python scripts/sqlite_portability_smoke.py --report sqlite-native-report.json
           ${{ matrix.system && '--system' || '' }}
       - name: Attempt full native starter GUI compile (experimental)
         shell: bash
         continue-on-error: true
         run: >-
-          python scripts/sqlite_portability_smoke.py --gui
+          python scripts/sqlite_portability_smoke.py --gui --report sqlite-gui-report.json
           ${{ matrix.system && '--system' || '' }}
+      - name: Publish per-platform diagnostics
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          for kind in ("native", "gui"):
+              file = Path(f"sqlite-{kind}-report.json")
+              if not file.exists():
+                  print(f"### {kind}: not executed (no report)\n")
+                  continue
+              report = json.loads(file.read_text(encoding="utf-8"))
+              print(f"### {kind}: {report['status']}\n")
+              print(f"Host: `{report['host']}`; steps: {len(report['steps'])}\n")
+              if report['error']:
+                  print(f"Failure: `{report['error']['type']}` — {report['error']['message']}\n")
+          PY
+      - name: Upload portability diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sqlite-${{ matrix.os }}-reports
+          path: sqlite-*-report.json
+          if-no-files-found: warn

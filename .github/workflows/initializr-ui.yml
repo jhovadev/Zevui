@@ -63,3 +63,9 @@ jobs:
       - name: Build SolidStart
         working-directory: apps/initializr
         run: bun run build
+      - name: Check private server asset staging
+        run: node --test apps/initializr/tests/stage-assets.test.mjs
+      - name: Verify Vercel Build Output API (no deployment)
+        run: |
+          npm --prefix apps/initializr run build:vercel
+          test -f .vercel/output/config.json

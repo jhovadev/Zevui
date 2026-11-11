@@ -6,6 +6,10 @@ Zevui is an **independent community SDK and example-driven template**, not a rep
 
 > **Status:** F3 SDK extraction (after F2/Z0/F1) · **Zig 0.17.1** · native desktop UI · MIT. Linux x86-64 has been exercised by the project author; other cross-build targets need target-host validation. Names and APIs are subject to change.
 
+## Initializr website deployment
+
+The SolidStart 2 + Nitro 3 Initializr can be deployed as a **Vercel project connected to this monorepo**. Select repository root (`./`) as Vercel Root Directory; the committed `vercel.json` handles the app-only install and build. The server bundles only reviewed starter sources, and preview/production deployment must be smoke-tested. See [the Vercel deployment guide](docs/architecture/f7-initializr-vercel.md).
+
 ## Zevui Initializr — generate your own Zig app
 
 Zevui now includes a local, Spring Initializr-style project generator with an addon catalog. It produces self-contained Zig sources from selected features, with native DVUI/SDL3 and a typed `zevui.zon` configuration. **The generated app needs no Python or Zevui CLI to compile.**

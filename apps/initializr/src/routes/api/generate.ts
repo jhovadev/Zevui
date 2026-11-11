@@ -36,6 +36,9 @@ export async function POST({ request }: APIEvent) {
     const safeName = typeof project.name === "string" && /^[a-z][a-z0-9_-]{1,31}$/.test(project.name)
       ? project.name : "zevui-app";
     const result = await generateProject(payload);
+    // Vercel Functions have a 4.5 MB response limit; fail before sending an oversized ZIP.
+    if (process.env.VERCEL === "1" && result.byteLength > 4_400_000)
+      throw new GeneratorError("Generated ZIP exceeds the hosting response limit", 413);
     return new Response(result as BodyInit, {
       headers: {
         "Content-Type": "application/zip",

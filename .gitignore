@@ -38,3 +38,8 @@ packages/initializr-core/dist/
 # F4 generated registry metadata is intentionally committed, despite dist/ ignore.
 !registry/dist/
 !registry/dist/metadata-0.17.json
+
+# Vercel build output and curated private build-time staging
+.vercel/
+apps/initializr/.vercel/
+apps/initializr/.zevui-server-assets/

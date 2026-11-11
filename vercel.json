@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npm install --prefix apps/initializr --no-audit --no-fund",
+  "buildCommand": "node apps/initializr/scripts/vercel-build.mjs"
+}

@@ -75,3 +75,32 @@ SHA-256 provenance checks. Keep vendor files unmodified. To gate our own changes
 git diff --cached --check -- . ':(exclude)addons/storage-sqlite/vendor/sqlite3.c' ':(exclude)addons/storage-sqlite/vendor/sqlite3.h'
 python3 addons/storage-sqlite/tools/vendor_sqlite.py --check
 ```
+
+## F6D: make native CI observable on every relevant `main` push
+
+The F6C SQLite workflow initially had only `workflow_dispatch` and
+`pull_request` triggers. A push of `70819d0` to `main` did not start this
+workflow, so no Windows/macOS evidence was collected. F6D adds a path-scoped
+`push` trigger for `main`, while preserving manual and PR execution.
+
+Each runner writes a JSON report for the native storage tests and (if reached)
+for the experimental full GUI attempt. A diagnostic summary is published and
+`sqlite-<runner>-reports` artifacts are uploaded even when a test fails.
+The JSON includes the failing command and error, not only a green/red job icon.
+Only the Linux job blocks the workflow result (and merges when a branch rule
+requires that workflow); Windows/macOS keep `continue-on-error: true` until
+they are successfully verified on native hosts.
+Do not promote `addons/storage-sqlite/addon.json` targets based solely on a
+green workflow badge: inspect each experimental job and its report first.
+
+Review runs under GitHub Actions > SQLite native portability (F6C experimental)
+or manually trigger `workflow_dispatch`. Local reproduction remains:
+
+```bash
+just registry-check
+python scripts/sqlite_portability_smoke.py --system --report /tmp/zevui-sqlite-report.json
+```
+
+The command does not download SQLite sources; `vendor_sqlite.py --check`
+verifies the existing vendored sources. The JSON report is optional for local
+usage and does not alter the build or generated project files.

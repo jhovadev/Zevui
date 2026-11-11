@@ -5,16 +5,20 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 8765",
-    "build": "vite build",
+    "build": "tsc -p ../../packages/initializr-core/tsconfig.json && node scripts/stage-assets.mjs && vite build",
     "preview": "vite preview --host 127.0.0.1 --port 8765",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:vercel": "node scripts/vercel-build.mjs"
   },
-  "engines": { "node": ">=24" },
+  "engines": {
+    "node": "24.x"
+  },
   "dependencies": {
     "@solidjs/router": "^1.0.1",
     "@solidjs/start": "2.2.2",
     "nitro": "3.0.261103-rc",
-    "solid-js": "^1.9.16"
+    "solid-js": "^1.9.16",
+    "unstorage": "^2.0.0-alpha.10"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
