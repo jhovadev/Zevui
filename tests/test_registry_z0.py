@@ -20,7 +20,7 @@ class RegistryContracts(unittest.TestCase):
         self.assertIn(reviewed['url'], manifest)
         self.assertIn(reviewed['hash'], manifest)
         self.assertEqual([a['id'] for a in CATALOG['addons'] if a['status']=='available'],
-                         ['memory_store', 'design_tokens'])
+                         ['memory_store', 'design_tokens', 'sqlite'])
 
     def test_supported_addon_sources_are_real_and_confined(self):
         for addon in CATALOG['addons']:

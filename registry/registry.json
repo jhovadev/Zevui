@@ -17,7 +17,7 @@
     "addons/design-tokens/addon.json",
     "registry/planned/zdata.json",
     "registry/planned/tray.json",
-    "registry/planned/sqlite.json",
+    "addons/storage-sqlite/addon.json",
     "registry/planned/bundle.json"
   ]
 }

@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "id": "sqlite",
+  "version": "0.1.0",
+  "name": "SQLite",
+  "category": "Storage",
+  "description": "Native SQLite3 KV storage, prepared statements and transactions. System link by default; opt-in bundled/off.",
+  "kind": "c-system",
+  "status": "available",
+  "delivery": "source-copy",
+  "default": false,
+  "provides": [
+    "sqlite"
+  ],
+  "requires": [],
+  "conflicts": [],
+  "compat": {
+    "zig": [
+      "0.17.1"
+    ],
+    "zevui": "0.1.0",
+    "targets": [
+      "linux"
+    ]
+  },
+  "package": null,
+  "trust": "official",
+  "license": "MIT",
+  "files": [
+    {
+      "from": "addons/storage-sqlite/src/root.zig",
+      "to": "src/addons/sqlite.zig"
+    },
+    {
+      "from": "addons/storage-sqlite/src/off.zig",
+      "to": "src/addons/sqlite_off.zig"
+    },
+    {
+      "from": "addons/storage-sqlite/tools/vendor_starter.py",
+      "to": "src/addons/sqlite_vendor.py"
+    },
+    {
+      "from": "addons/storage-sqlite/LICENSE",
+      "to": "src/addons/sqlite_LICENSE.txt"
+    }
+  ]
+}

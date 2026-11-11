@@ -1,0 +1,62 @@
+const std = @import("std");
+const zevui = @import("zevui/build.zig");
+
+pub fn build(b: *std.Build) void {
+    const cfg: zevui.Config = @import("zevui.zon");
+    const target = b.standardTargetOptions(.{});
+    const optimize = b.standardOptimizeOption(.{});
+    const portable = b.option(bool, "portable-gui", "Disable optional DVUI native dependencies") orelse false;
+    const windows_console = b.option(bool, "windows-console", "Enable Windows debug console") orelse false;
+    const app = zevui.addApp(b, cfg, .{
+        .target = target,
+        .optimize = optimize,
+        .root_source_file = "src/main.zig",
+        .portable_gui = portable,
+        .windows_console = windows_console,
+    });
+    // F6B: disabled mode never imports SQLite's C symbols or links libc.
+    const sqlite = b.option(SqliteMode, "sqlite", "SQLite provider: system, bundled, off") orelse .system;
+    const file: []const u8 = if (sqlite == .off) "src/addons/sqlite_off.zig" else "src/addons/sqlite.zig";
+    const module = b.createModule(.{
+        .root_source_file = b.path(file), .target = target, .optimize = optimize,
+    });
+    configureSqlite(b, module, sqlite);
+    app.executable.root_module.addImport("storage_sqlite", module);
+    const tests = b.step("test", "Run Zevui configuration and addon tests");
+    const sqlite_tests = b.addTest(.{ .root_module = b.createModule(.{
+        .root_source_file = b.path(file), .target = target, .optimize = optimize,
+    }) });
+    configureSqlite(b, sqlite_tests.root_module, sqlite);
+    tests.dependOn(&b.addRunArtifact(sqlite_tests).step);
+    inline for (.{ "zevui/config.zig"{{ADDON_TEST_PATHS}} }) |path| {
+        const unit = b.addTest(.{ .root_module = b.createModule(.{
+            .root_source_file = b.path(path), .target = target, .optimize = optimize,
+        }) });
+        tests.dependOn(&b.addRunArtifact(unit).step);
+    }
+}
+
+const SqliteMode = enum { system, bundled, off };
+
+fn configureSqlite(b: *std.Build, module: *std.Build.Module, mode: SqliteMode) void {
+    switch (mode) {
+        .off => {}, // No C source, libc or sqlite3 symbols.
+        .system => {
+            module.link_libc = true;
+            module.linkSystemLibrary("sqlite3", .{ .use_pkg_config = .no });
+        },
+        .bundled => {
+            // Explicitly run: python3 src/addons/sqlite_vendor.py
+            // No network or scripts run during Zig builds.
+            module.link_libc = true;
+            module.addCSourceFile(.{
+                .file = b.path("src/addons/sqlite_vendor/sqlite3.c"),
+                .flags = &.{
+                    "-DSQLITE_THREADSAFE=1",
+                    "-DSQLITE_OMIT_LOAD_EXTENSION=1",
+                    "-DSQLITE_DQS=0",
+                },
+            });
+        },
+    }
+}

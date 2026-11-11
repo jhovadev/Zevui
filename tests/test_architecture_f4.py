@@ -25,7 +25,7 @@ class ArchitectureF4Tests(unittest.TestCase):
         self.assertEqual(metadata['registryVersion'], '0.2.0')
         self.assertEqual(metadata['addons'][0]['package'], None)
         self.assertEqual([a['id'] for a in metadata['addons'] if a['status'] == 'available'],
-                         ['memory_store', 'design_tokens'])
+                         ['memory_store', 'design_tokens', 'sqlite'])
 
     def test_independent_packages_have_zig_manifests_and_public_modules(self):
         for ident, dirname in [('memory_store', 'memory-store'), ('design_tokens', 'design-tokens')]:

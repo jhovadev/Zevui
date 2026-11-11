@@ -16,6 +16,9 @@ const sources = Object.fromEntries([
   'templates/minimal/.gitignore', 'templates/minimal/src/main.zig',
   'templates/compat/zevui/build.zig', 'templates/compat/zevui/config.zig',
   'addons/design-tokens/src/root.zig', 'addons/memory-store/src/root.zig',
+  'templates/sqlite/build.zig.tmpl', 'templates/sqlite/README.md.tmpl', 'templates/sqlite/src/main.zig',
+  'addons/storage-sqlite/src/root.zig', 'addons/storage-sqlite/src/off.zig',
+  'addons/storage-sqlite/tools/vendor_starter.py', 'addons/storage-sqlite/LICENSE',
 ].map(p => [p, read(p)]));
 
 for (const [key, { project, files }] of Object.entries(golden)) {
@@ -50,7 +53,7 @@ test('planner and ZIP share identical paths with safe project root', () => {
 });
 test('invalid and inactive addons never reach source reads', () => {
   const p = golden.addons.project;
-  assert.throws(() => generateProject({...p,addons:['sqlite']}, registry, sources), e => e instanceof PlanError && e.code === 'addon');
+  assert.throws(() => generateProject({...p,addons:['tray']}, registry, sources), e => e instanceof PlanError && e.code === 'addon');
   assert.throws(() => generateProject({...p,addons:['../x']}, registry, sources), e => e instanceof PlanError && e.code === 'addon');
 });
 test('missing source fails closed before producing a ZIP', () => {
@@ -106,7 +109,7 @@ test('production API and CLI consume only canonical source list, including templ
   const expected = requiredSources(plan);
   assert.equal(expected.length, 8 + 2); // 6 starter templates, 2 compat SDK, 2 selected addons
   assert.deepEqual(expected, [...expected].sort());
-  assert.deepEqual(expected, Object.keys(sources).sort());
+  assert.deepEqual(expected, Object.keys(sources).filter(p => !p.startsWith('templates/sqlite/') && !p.startsWith('addons/storage-sqlite/')).sort());
   const generated = generateProject(p, registry, sources);
   assert.ok(generated.files.has('src/main.zig'));
 });
@@ -125,4 +128,42 @@ test('user-supplied braces are inert data and never reinterpreted as template to
   const g = generateProject(p, registry, sources);
   const readme = new TextDecoder().decode(g.files.get('README.md'));
   assert.ok(readme.includes('Real {{TITLE_RAW}} App'));
+});
+
+test('SQLite is opt-in, native C-link build is isolated, and ZIP remains deterministic', () => {
+  const p = {...golden.minimal.project, addons: ['sqlite']};
+  const plan = planProject(p, registry);
+  const required = requiredSources(plan);
+  assert.ok(required.includes('addons/storage-sqlite/src/root.zig'));
+  assert.ok(required.includes('templates/sqlite/build.zig.tmpl'));
+  const g = generateProject(p, registry, sources);
+  assert.deepEqual([...g.files.keys()], plan.operations.map(op => op.path));
+  assert.deepEqual([...g.files.keys()].filter(x => x.startsWith('src/addons/')).sort(), [
+    'src/addons/sqlite.zig','src/addons/sqlite_LICENSE.txt','src/addons/sqlite_off.zig','src/addons/sqlite_vendor.py',
+  ]);
+  const build = new TextDecoder().decode(g.files.get('build.zig'));
+  assert.match(build, /sqlite_vendor\/sqlite3\.c/);
+  assert.match(build, /sqlite3/);
+  assert.match(build, /\.off => \{\}/);
+  assert.match(new TextDecoder().decode(g.files.get('src/main.zig')), /@import\("storage_sqlite"\)/);
+  assert.match(new TextDecoder().decode(g.files.get('src/main.zig')), /SQLite storage addon selected/);
+  const without = generateProject({...p, addons: []}, registry, sources);
+  assert.doesNotMatch(new TextDecoder().decode(without.files.get('build.zig')), /SqliteMode/);
+  assert.equal([...without.files.keys()].filter(x => x.startsWith('src/addons/')).length, 0);
+  assert.deepEqual(zipProject(g), zipProject(generateProject({...p,addons:['sqlite']}, registry, sources)));
+});
+
+test('SQLite selection fails closed when a required source is missing', () => {
+  const p = {...golden.minimal.project,addons:['sqlite']};
+  const missing = {...sources};
+  delete missing['addons/storage-sqlite/tools/vendor_starter.py'];
+  assert.throws(() => generateProject(p, registry, missing), e => e instanceof PlanError && e.code === 'source');
+});
+
+test('SQLite availability rejects unverified Windows/macOS generator targets', () => {
+  const p = {...golden.minimal.project,addons:['sqlite']};
+  for (const target of ['windows','macos']) {
+    assert.throws(() => planProject({...p,target}, registry),
+      e => e instanceof PlanError && e.code === 'compatibility');
+  }
 });

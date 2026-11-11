@@ -109,24 +109,39 @@
       "id": "sqlite",
       "name": "SQLite",
       "category": "Storage",
-      "description": "Prepared statements and migration support planned; not in initial generator.",
-      "status": "planned",
+      "description": "Native SQLite3 KV storage, prepared statements and transactions. System link by default; opt-in bundled/off.",
+      "status": "available",
       "default": false,
-      "kind": "planned",
+      "kind": "c-system",
       "requires": [],
       "conflicts": [],
       "targets": [
-        "linux",
-        "windows",
-        "macos"
+        "linux"
       ],
       "zig": [
         "0.17.1"
       ],
       "zevui": "0.1.0",
       "trust": "official",
-      "license": "NOASSERTION",
-      "files": []
+      "license": "MIT",
+      "files": [
+        {
+          "from": "addons/storage-sqlite/src/root.zig",
+          "to": "src/addons/sqlite.zig"
+        },
+        {
+          "from": "addons/storage-sqlite/src/off.zig",
+          "to": "src/addons/sqlite_off.zig"
+        },
+        {
+          "from": "addons/storage-sqlite/tools/vendor_starter.py",
+          "to": "src/addons/sqlite_vendor.py"
+        },
+        {
+          "from": "addons/storage-sqlite/LICENSE",
+          "to": "src/addons/sqlite_LICENSE.txt"
+        }
+      ]
     },
     {
       "id": "bundle",

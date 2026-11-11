@@ -33,11 +33,14 @@ class StorageSqliteF6A(unittest.TestCase):
         self.assertIn('test "sqlite prepared statements', root)
         self.assertIn('test "transaction rollback', root)
 
-    def test_sqlite_remains_unavailable_to_generator(self):
-        manifest = json.loads((ROOT / "registry/planned/sqlite.json").read_text())
-        self.assertEqual(manifest['status'], 'planned')
-        self.assertEqual(manifest['delivery'], 'unavailable')
-        self.assertEqual(manifest['files'], [])
+    def test_sqlite_is_opt_in_and_source_copied_in_f6b(self):
+        manifest = json.loads((ADDON / "addon.json").read_text())
+        self.assertEqual(manifest['id'], 'sqlite')
+        self.assertEqual(manifest['status'], 'available')
+        self.assertEqual(manifest['delivery'], 'source-copy')
+        self.assertFalse(manifest['default'])
+        self.assertEqual(len(manifest['files']), 4)
+        self.assertEqual(manifest['compat']['targets'], ['linux'])
 
 
 if __name__ == '__main__':

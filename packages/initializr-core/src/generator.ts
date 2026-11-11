@@ -60,6 +60,7 @@ export const STARTER_SOURCES = [
 /** Both the API and CLI load exactly the assets needed by the validated plan. */
 export function requiredSources(plan: Plan): string[] {
   return [...new Set([...STARTER_SOURCES,
+    ...(plan.resolvedAddons.includes("sqlite") ? ["templates/sqlite/build.zig.tmpl", "templates/sqlite/README.md.tmpl", "templates/sqlite/src/main.zig"] : []),
     ...plan.operations.filter((op) => op.kind === "copy").map((op) => op.source!),
   ])].sort();
 }
@@ -85,6 +86,13 @@ function addonImports(plan: Plan, catalog: Catalog): { source: string; docs: str
   for (const addon of catalog.addons) {
     const id = addon.id;
     if (!addons.has(id)) continue;
+    // SQLite owns three copied files but exposes only one public Zig module.
+    // Its build template chooses between the native and no-link OFF implementations.
+    if (id === "sqlite") {
+      lines.push('comptime { _ = @import("storage_sqlite").Database; }');
+      docs.push('SQLite: @import("storage_sqlite").Database / KeyValue');
+      continue;
+    }
     for (const mapping of addon.files) {
       const rel = mapping.to.replace(/^src\//, "");
       if (id === "memory_store") {
@@ -119,17 +127,20 @@ export function generateProject(input: ProjectInput, catalog: Catalog, sources: 
     ZIG_PACKAGE_NAME: p.name.replaceAll("-", "_"),
     TITLE_RAW: p.title,
     ZIG_VERSION_RAW: p.zig ?? "0.17.1",
-    ADDON_TEST_PATHS: plan.resolvedAddons.map((id) => `, "src/addons/${id}.zig"`).join(""),
+    ADDON_TEST_PATHS: plan.resolvedAddons.filter((id) => id !== "sqlite").map((id) => `, "src/addons/${id}.zig"`).join(""),
     ADDON_DOCS: addon.docs.map((line) => `- ${line}\n`).join(""),
   };
   const generated: Record<string, Uint8Array> = {
-    "build.zig": renderTemplate("templates/minimal/build.zig.tmpl", sources, substitutions),
+    "build.zig": renderTemplate(plan.resolvedAddons.includes("sqlite")
+      ? "templates/sqlite/build.zig.tmpl" : "templates/minimal/build.zig.tmpl", sources, substitutions),
     "build.zig.zon": renderTemplate("templates/minimal/build.zig.zon.tmpl", sources, substitutions),
     "zevui.zon": renderTemplate("templates/minimal/zevui.zon.tmpl", sources, substitutions),
-    "README.md": renderTemplate("templates/minimal/README.md.tmpl", sources, substitutions),
+    "README.md": renderTemplate(plan.resolvedAddons.includes("sqlite")
+      ? "templates/sqlite/README.md.tmpl" : "templates/minimal/README.md.tmpl", sources, substitutions),
     ".gitignore": value(sources["templates/minimal/.gitignore"], "templates/minimal/.gitignore"),
     "src/main.zig": (() => {
-      const path = "templates/minimal/src/main.zig";
+      const path = plan.resolvedAddons.includes("sqlite")
+        ? "templates/sqlite/src/main.zig" : "templates/minimal/src/main.zig";
       const base = value(sources[path], path);
       const suffix = encoder.encode(addon.source);
       const result = new Uint8Array(base.length + suffix.length);

@@ -26,7 +26,7 @@ test('no addon means no addon code', () => {
   assert.equal(result.operations.filter(f => f.path.startsWith('src/addons/')).length, 0);
 });
 test('rejected incomplete, non-official and invalid targets', () => {
-  failure('addon', () => planProject({ ...project, addons: ['sqlite'] }, registry));
+  failure('addon', () => planProject({ ...project, addons: ['tray'] }, registry));
   failure('addon', () => planProject({ ...project, addons: ['__bad__'] }, registry));
   failure('target', () => planProject({ ...project, target: 'haiku' }, registry));
   failure('zig', () => planProject({ ...project, zig: '0.99.0' }, registry));

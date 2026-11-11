@@ -13,7 +13,7 @@ class InitializrTests(unittest.TestCase):
     def test_catalog_schema_and_enabled_addons(self):
         self.assertEqual(CATALOG['schemaVersion'], 2)
         self.assertEqual([a['id'] for a in CATALOG['addons'] if a['status'] == 'available'],
-                         ['memory_store','design_tokens'])
+                         ['memory_store','design_tokens','sqlite'])
 
     def test_unsupported_addons_fail_closed(self):
         for addon in ('tray', 'sqlite', 'bundle', 'zdata', '../etc/passwd'):

@@ -16,6 +16,11 @@ set positional-arguments := true
     just --version
     python3 scripts/check_layout.py
 
+# F6B.1: fail fast if a different Zig executable is on PATH.
+# Do not compile with mismatched build API packages or silently patch zig-pkg.
+@zig-preflight:
+    python3 scripts/zig_preflight.py
+
 # First-time setup: pin the ZData SDK in build.zig.zon; commit the resulting manifest.
 @setup:
     zig fetch --save=zdata git+https://github.com/jhovadev/zigdataengine.git
@@ -35,6 +40,7 @@ set positional-arguments := true
 
 # Validate integration and run headless tests; no GUI/display required.
 @check:
+    just zig-preflight
     python3 tools/build_registry.py --check
     python3 scripts/check_layout.py
     python3 -m unittest discover -s tests -v
@@ -46,6 +52,7 @@ set positional-arguments := true
 
 # Compile the native SDL3 app into zig-out/bin.
 @build:
+    just zig-preflight
     zig build -Doptimize=ReleaseFast
 
 # Run the native DVUI/SDL3 app (requires a graphical session).
@@ -114,6 +121,7 @@ set positional-arguments := true
 
 # Build the second DVUI app (no ZData), using the same Zevui addApp helper.
 @minimal:
+    just zig-preflight
     zig build minimal -Doptimize=ReleaseSafe
 
 # Run the independent DVUI-only example (requires a graphical desktop).
@@ -126,6 +134,7 @@ set positional-arguments := true
 
 # Test the standalone Zevui SDK package independently of CSV/ZData.
 @framework-check:
+    just zig-preflight
     cd framework && zig build test -Doptimize=ReleaseSafe
 
 # Install Initializr frontend dependencies (Node 24+, Bun).
@@ -182,6 +191,7 @@ set positional-arguments := true
 
 # Zig pure addons compile and test as separate packages; no DVUI/SDL/ZData imports.
 @addons-check:
+    just zig-preflight
     cd addons/memory-store && zig build test -Doptimize=ReleaseSafe
     cd addons/design-tokens && zig build test -Doptimize=ReleaseSafe
 
@@ -192,6 +202,7 @@ set positional-arguments := true
 # F6A experimental package: opt-in, independent from framework and F5 initializr.
 # `bundled` requires a separate, verified one-time vendor bootstrap.
 @sqlite-addon-check:
+    just zig-preflight
     cd addons/storage-sqlite && zig build test -Dsqlite=off -Doptimize=ReleaseSafe
     cd addons/storage-sqlite && zig build test -Dsqlite=system -Doptimize=ReleaseSafe
 
@@ -199,5 +210,17 @@ set positional-arguments := true
     python3 addons/storage-sqlite/tools/vendor_sqlite.py
 
 @sqlite-bundled-check:
+    just zig-preflight
     python3 addons/storage-sqlite/tools/vendor_sqlite.py --check
     cd addons/storage-sqlite && zig build test -Dsqlite=bundled -Doptimize=ReleaseSafe
+
+# F6B: validate the generator's new native SQLite source-copy selection.
+# No download occurs during these checks; system mode needs sqlite3 dev libraries.
+@sqlite-initializr-check:
+    just zig-preflight
+    just registry-check
+    @tmpdir=$(mktemp -d); trap 'rm -rf "$tmpdir"' EXIT; \
+      node packages/initializr-core/scripts/new.mjs sqlite-smoke --addon sqlite --output "$tmpdir"; \
+      cd "$tmpdir/sqlite-smoke"; \
+      zig build test -Dsqlite=system -Doptimize=ReleaseSafe; \
+      zig build test -Dsqlite=off -Doptimize=ReleaseSafe

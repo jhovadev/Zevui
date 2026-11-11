@@ -1,6 +1,6 @@
 # Zevui SQLite addon — F6A (experimental)
 
-Standalone Zig 0.17.1 SQLite wrapper; **not selected by Initializr yet**. Does not change `framework/`, F2 goldens or existing user apps. The API uses explicit C ABI declarations (not `@cImport`); a separately pinned `translate-c` dependency can be considered later if the wrapper grows.
+Standalone Zig 0.17.1 SQLite wrapper. F6B enables opt-in Initializr selection on Linux (Windows/macOS await native verification). Does not change `framework/`, F2 goldens or existing user apps. The API uses explicit C ABI declarations (not `@cImport`); a separately pinned `translate-c` dependency can be considered later if the wrapper grows.
 
 ## Build modes
 
@@ -26,4 +26,4 @@ The vendor script downloads an archive from `https://www.sqlite.org/2026/sqlite-
 - Explicitly finalize statements before closing the database; `Database.close` reports `Busy` for outstanding statements.
 - WAL is not appropriate on network filesystems; caller decides when to enable it. Do not put secrets in plaintext SQLite without additional encryption.
 
-**F6B gate before exposing SQLite as available in Initializr:** verified `bundled/system/off` Zig builds, Windows/macOS native runs, generation of a project with linked C, deterministic ZIP, validation of third-party C sources, and truthful registry manifests. SQLite is deliberately still `planned` in `registry/` until that integration is complete.
+**F6B status:** selected via `--addon sqlite` on Linux and copied with its MIT license notice. Generated builds default to system SQLite; bundled requires the explicit pinned vendor script. Windows/macOS generator selections remain gated until native checks pass; Zig package publication remains pending.

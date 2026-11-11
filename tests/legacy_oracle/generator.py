@@ -17,7 +17,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 CATALOG = json.loads((ROOT / 'registry/catalog.json').read_text())
-AVAILABLE = frozenset(a['id'] for a in CATALOG['addons'] if a['status'] == 'available')
+# Frozen F2/F3 oracle: the production TypeScript generator alone supports new addons.
+AVAILABLE = frozenset(a['id'] for a in CATALOG['addons'] if a['id'] in {'memory_store', 'design_tokens'} and a['status'] == 'available')
 NAME = re.compile(r'^[a-z][a-z0-9_-]{1,31}$')
 ORG = re.compile(r'^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9]*)+$')
 VERSION = re.compile(r'^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$')

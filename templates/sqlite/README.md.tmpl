@@ -1,0 +1,34 @@
+# {{TITLE_RAW}}
+
+Generated with **Zevui Initializr** (Zig {{ZIG_VERSION_RAW}} / DVUI + SDL3).
+
+This is a standalone Zig project; no Zevui CLI or Python is needed to build.
+
+```sh
+zig build
+zig build run
+zig build -Dportable-gui=true
+```
+
+SQLite3 is opt-in and uses the system SQLite library by default. Select a link mode:
+
+```sh
+zig build test -Dsqlite=system         # requires system sqlite3 development library
+zig build test -Dsqlite=off            # no C symbols and no libc from this addon
+python3 src/addons/sqlite_vendor.py    # one-time verified official SQLite bootstrap
+zig build test -Dsqlite=bundled        # compiles the checked vendor source
+```
+
+The vendor script is optional and uses Python 3 only for the explicit one-time download.
+No Python or Node is needed for ordinary Zig builds. The SQLite code is isolated
+from Zevui core. `-Dsqlite=bundled` requires the generated C source to be present.
+Do not use `-Dsqlite=system` if the system development library is missing; on
+Windows prefer bundled after vendoring. Initializr selection currently supports Linux
+only; Windows/macOS remain gated on native tests. The copied MIT notice for
+the Zig wrapper is at `src/addons/sqlite_LICENSE.txt`.
+
+Addons:
+{{ADDON_DOCS}}
+The SDL3 GUI may require native graphics libraries/SDKs for your target.
+Windows uses the GUI subsystem by default; `-Dwindows-console=true` enables a debug console.
+Generated from the M0.5 local Build Core; the Zevui package is not yet published.
