@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { inspectZip, runSmoke } from '../scripts/smoke-production.mjs';
+import { inspectZip, runSmoke, verifyHomepage } from '../scripts/smoke-production.mjs';
 
 const CORE = ['README.md', 'build.zig', 'build.zig.zon', 'mise.toml', 'src/main.zig',
   'zevui.zon', '.gitignore', 'zevui/build.zig', 'zevui/config.zig'];
@@ -49,15 +49,23 @@ function fakeZip(root, paths) {
   return Buffer.concat([...parts, directory, end]);
 }
 
+const TITLE = '<title>Zevui Initializr — Start native</title>';
+const SHELL = `<!doctype html><html lang="es"><head>${TITLE}</head><body>` +
+  '<div id="app"></div><script type="module" src="/_build/assets/entry-client.js"></script></body></html>';
+const SSR = `<!doctype html><html lang="es"><head>${TITLE}</head><body>` +
+  '<div id="app"><h1>Build native.</h1></div><script src="/_build/client.js"></script></body></html>';
+const htmlResponse = (body, contentType = 'text/html; charset=utf-8') =>
+  new Response(body, { headers: { 'content-type': contentType } });
+
 const catalog = {
   zig: '0.17.1', addons: [{ id: 'sqlite', status: 'available', targets: ['linux'] },
     { id: 'design_tokens', status: 'available', targets: ['linux', 'windows', 'macos'] }],
 };
 
-function mockFetch({ addons = catalog.addons, changeZip, status = 200 } = {}) {
+function mockFetch({ addons = catalog.addons, changeZip, status = 200, homepage = SHELL } = {}) {
   return async function mock(url, options = {}) {
     const path = new URL(url).pathname;
-    if (path === '/') return new Response('<h1>Build native</h1>zevui', { status: 200 });
+    if (path === '/') return new Response(homepage, { headers: { 'content-type': 'text/html; charset=utf-8' } });
     if (path === '/api/metadata') {
       if (options.headers?.['If-None-Match']) return new Response(null, { status: 304 });
       return Response.json({ ...catalog, addons }, { headers: { etag: '"smoke"' } });
@@ -81,6 +89,26 @@ test('production smoke checks homepage, metadata, plan, minimal and SQLite ZIPs'
     fetchImpl: mockFetch(), log: message => log.push(message) });
   assert.equal(log.filter(line => line.startsWith('PASS zevui-smoke-')).length, 2);
   assert.match(log.at(-1), /PASS Zevui production smoke/);
+});
+
+test('recognizes SSR and the official CSR document without relying on hero text', async () => {
+  assert.equal(verifyHomepage(htmlResponse(SSR), SSR), 'SSR');
+  assert.equal(verifyHomepage(htmlResponse(SHELL), SHELL), 'CSR shell');
+  const log = [];
+  await runSmoke({ fetchImpl: mockFetch({ homepage: SHELL }), log: line => log.push(line) });
+  assert.ok(log.includes('PASS homepage (CSR shell)'));
+});
+
+test('rejects unrelated HTML, auth challenges, invalid content types and empty shells', async () => {
+  const unrelated = '<!doctype html><title>Vercel Authentication</title><p>Sign in</p>';
+  assert.throws(() => verifyHomepage(htmlResponse(unrelated), unrelated),
+    /title="Vercel Authentication"/);
+  assert.throws(() => verifyHomepage(htmlResponse(SHELL, 'text/plain'), SHELL),
+    /content-type="text\/plain"/);
+  const empty = `<!doctype html><title>Zevui Initializr — Start native</title><div id="app"></div>`;
+  assert.throws(() => verifyHomepage(htmlResponse(empty), empty), /boot-script=false/);
+  await assert.rejects(runSmoke({ fetchImpl: mockFetch({ homepage: unrelated }), log: () => {} }),
+    /Homepage: expected Zevui Initializr HTML/);
 });
 
 test('fails closed when SQLite is not available in production', async () => {

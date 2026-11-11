@@ -55,7 +55,13 @@ plans. It also verifies the `mise.toml` pin, required native sources, and
 bytes in memory. It neither writes to Vercel storage nor builds generated apps.
 
 Run locally with `node --test apps/initializr/tests/smoke-production.test.mjs`
-before using the live site. The GitHub Actions `Initializr Production Smoke`
+before using the live site. The homepage check verifies the Initializr
+HTML document title, its `#app` mount and either the SSR hero or a client
+bootstrap script. Client-rendered HTML shells are accepted, but unrelated
+landing pages or authentication challenges still fail with a diagnostic
+containing only the HTML title, content type and structural checks. The API,
+plan and ZIP checks remain mandatory, so a valid shell is not a complete pass.
+The GitHub Actions `Initializr Production Smoke`
 workflow can be dispatched manually after a deployment; it deliberately does
 not run on push to avoid racing against Vercel's asynchronous deployment.
 

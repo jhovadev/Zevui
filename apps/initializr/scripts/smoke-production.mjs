@@ -98,6 +98,24 @@ async function json(fetchImpl, url, options = {}) {
   return { value: await response.json(), response };
 }
 
+/** Verify the stable SolidStart document, not hero copy that can be client-rendered.
+ * A CSR shell is legitimate; metadata and ZIP endpoints are checked separately.
+ * Error details deliberately exclude full HTML or headers (possible secrets).
+ */
+export function verifyHomepage(response, html) {
+  const contentType = response.headers.get('content-type') || '(missing)';
+  const title = /<title\b[^>]*>([^<]{0,160})<\/title\s*>/i.exec(html)?.[1]?.trim() || '(missing)';
+  const validTitle = /^Zevui Initializr(?:\s*[—–-]\s*Start native)?$/i.test(title);
+  const appRoot = /<div\b[^>]*\bid\s*=\s*["']app["'][^>]*>/i.test(html);
+  const bootScript = /<script\b[^>]*\bsrc\s*=\s*["'][^"']+\.js(?:\?[^"']*)?["']/i.test(html);
+  const hasHero = /Build native/i.test(html);
+  assert(contentType.toLowerCase().includes('text/html') && validTitle && appRoot && (hasHero || bootScript),
+    `Homepage: expected Zevui Initializr HTML (title=${JSON.stringify(title)}, ` +
+    `content-type=${JSON.stringify(contentType)}, app-root=${appRoot}, boot-script=${bootScript}). ` +
+    'Check Vercel deployment, redirect/protection, or SSR/CSR configuration.');
+  return hasHero ? 'SSR' : 'CSR shell';
+}
+
 export async function runSmoke({ baseUrl = DEFAULT_URL, fetchImpl = fetch, log = console.log } = {}) {
   const base = new URL(baseUrl);
   assert(['https:', 'http:'].includes(base.protocol) && base.username === '' && base.password === '',
@@ -107,8 +125,7 @@ export async function runSmoke({ baseUrl = DEFAULT_URL, fetchImpl = fetch, log =
 
   const home = await checkedFetch(fetchImpl, endpoint('/'));
   const html = await home.text();
-  assert(html.includes('zevui') && html.includes('Build native'), 'Homepage does not contain Initializr markers');
-  log('PASS homepage');
+  log(`PASS homepage (${verifyHomepage(home, html)})`);
 
   const { value: catalog, response: metadataResponse } = await json(fetchImpl, endpoint('/api/metadata'));
   assert(catalog?.zig === '0.17.1' && Array.isArray(catalog.addons) && catalog.addons.length > 0,
