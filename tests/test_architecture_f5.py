@@ -8,7 +8,7 @@ TEMPLATE = ROOT / 'templates/minimal'
 class TemplatesF5Tests(unittest.TestCase):
     def test_all_generated_baseline_files_have_real_templates(self):
         for name in ('build.zig.tmpl', 'build.zig.zon.tmpl', 'zevui.zon.tmpl',
-                     'README.md.tmpl', '.gitignore', 'src/main.zig'):
+                     'README.md.tmpl', '.gitignore', 'mise.toml.tmpl', 'src/main.zig'):
             with self.subTest(name=name):
                 self.assertTrue((TEMPLATE / name).is_file())
 

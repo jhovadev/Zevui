@@ -13,7 +13,7 @@ const compatibility = JSON.parse(read('tests/fixtures/f41-golden-overrides.json'
 const sources = Object.fromEntries([
   'templates/minimal/build.zig.tmpl', 'templates/minimal/build.zig.zon.tmpl',
   'templates/minimal/zevui.zon.tmpl', 'templates/minimal/README.md.tmpl',
-  'templates/minimal/.gitignore', 'templates/minimal/src/main.zig',
+  'templates/minimal/.gitignore', 'templates/minimal/mise.toml.tmpl', 'templates/minimal/src/main.zig',
   'templates/compat/zevui/build.zig', 'templates/compat/zevui/config.zig',
   'addons/design-tokens/src/root.zig', 'addons/memory-store/src/root.zig',
   'templates/sqlite/build.zig.tmpl', 'templates/sqlite/README.md.tmpl', 'templates/sqlite/src/main.zig',
@@ -24,7 +24,9 @@ const sources = Object.fromEntries([
 for (const [key, { project, files }] of Object.entries(golden)) {
   test(`TS generator matches frozen Python output for ${key}`, () => {
     const g = generateProject(project, registry, sources);
-    assert.deepEqual([...g.files.keys()].sort(), Object.keys(files).sort());
+    // F6C only adds an exact toolchain hint; immutable F2 file hashes remain unchanged.
+    assert.deepEqual([...g.files.keys()].filter(path => path !== "mise.toml").sort(), Object.keys(files).sort());
+    assert.equal(new TextDecoder().decode(g.files.get("mise.toml")), `[tools]\nzig = "${project.zig ?? registry.zig}"\n`);
     for (const [path, expected] of Object.entries(files)) {
       const actual = createHash('sha256').update(g.files.get(path)).digest('hex');
       assert.equal(actual, compatibility[path]?.sha256 ?? expected, path);
@@ -107,11 +109,12 @@ test('production API and CLI consume only canonical source list, including templ
   const p = golden.addons.project;
   const plan = planProject(p, registry);
   const expected = requiredSources(plan);
-  assert.equal(expected.length, 8 + 2); // 6 starter templates, 2 compat SDK, 2 selected addons
+  assert.equal(expected.length, 9 + 2); // 7 starter templates, 2 compat SDK, 2 selected addons
   assert.deepEqual(expected, [...expected].sort());
   assert.deepEqual(expected, Object.keys(sources).filter(p => !p.startsWith('templates/sqlite/') && !p.startsWith('addons/storage-sqlite/')).sort());
   const generated = generateProject(p, registry, sources);
   assert.ok(generated.files.has('src/main.zig'));
+  assert.ok(generated.files.has('mise.toml'));
 });
 
 test('missing template and unknown template tokens fail closed', () => {

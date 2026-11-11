@@ -39,9 +39,11 @@ set positional-arguments := true
     zig build test-compile -Doptimize=ReleaseSafe
 
 # Validate integration and run headless tests; no GUI/display required.
+# F6C Python contracts execute the compiled TypeScript CLI/planner: refresh dist first.
+# registry-check does not download dependencies; run just initializr-setup once if missing.
 @check:
     just zig-preflight
-    python3 tools/build_registry.py --check
+    just registry-check
     python3 scripts/check_layout.py
     python3 -m unittest discover -s tests -v
     zig build test -Doptimize=ReleaseSafe
@@ -224,3 +226,19 @@ set positional-arguments := true
       cd "$tmpdir/sqlite-smoke"; \
       zig build test -Dsqlite=system -Doptimize=ReleaseSafe; \
       zig build test -Dsqlite=off -Doptimize=ReleaseSafe
+
+# F6C: offline native SQLite package and generated starter gates (OS-specific).
+# Requires `just registry-check` or `just initializr-check` to compile TypeScript first.
+@sqlite-portability-check:
+    just zig-preflight
+    python3 scripts/sqlite_portability_smoke.py
+
+# Linux host additionally exercises SQLite installed via the system linker.
+@sqlite-portability-linux:
+    just zig-preflight
+    python3 scripts/sqlite_portability_smoke.py --system
+
+# This is an experimental GUI build gate, separate from SQLite's proven API.
+@sqlite-portability-gui:
+    just zig-preflight
+    python3 scripts/sqlite_portability_smoke.py --gui

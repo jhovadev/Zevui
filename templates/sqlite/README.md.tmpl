@@ -4,6 +4,10 @@ Generated with **Zevui Initializr** (Zig {{ZIG_VERSION_RAW}} / DVUI + SDL3).
 
 This is a standalone Zig project; no Zevui CLI or Python is needed to build.
 
+The generated `mise.toml` pins Zig {{ZIG_VERSION_RAW}}. `mise install` and
+`mise exec -- zig build` are optional conveniences, **not** build requirements.
+Without mise, install Zig {{ZIG_VERSION_RAW}} and verify `zig version` before building.
+
 ```sh
 zig build
 zig build run

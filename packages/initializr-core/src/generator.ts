@@ -54,6 +54,7 @@ export const STARTER_SOURCES = [
   "templates/minimal/zevui.zon.tmpl",
   "templates/minimal/README.md.tmpl",
   "templates/minimal/.gitignore",
+  "templates/minimal/mise.toml.tmpl",
   "templates/minimal/src/main.zig",
 ] as const;
 
@@ -138,6 +139,7 @@ export function generateProject(input: ProjectInput, catalog: Catalog, sources: 
     "README.md": renderTemplate(plan.resolvedAddons.includes("sqlite")
       ? "templates/sqlite/README.md.tmpl" : "templates/minimal/README.md.tmpl", sources, substitutions),
     ".gitignore": value(sources["templates/minimal/.gitignore"], "templates/minimal/.gitignore"),
+    "mise.toml": renderTemplate("templates/minimal/mise.toml.tmpl", sources, substitutions),
     "src/main.zig": (() => {
       const path = plan.resolvedAddons.includes("sqlite")
         ? "templates/sqlite/src/main.zig" : "templates/minimal/src/main.zig";

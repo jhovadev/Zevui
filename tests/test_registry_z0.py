@@ -65,7 +65,9 @@ console.log(JSON.stringify(planProject(JSON.parse(process.argv[1]), r)));
         result = subprocess.run(['node', '--input-type=module', '-e', js, json.dumps(request)],
                                 capture_output=True, text=True, cwd=ROOT, check=True)
         plan = json.loads(result.stdout)
-        self.assertEqual(set(contents(request)), {entry['path'] for entry in plan['operations']})
+        # F6C adds a generated mise.toml without rewriting the frozen F2 oracle.
+        self.assertEqual(set(contents(request)) | {'mise.toml'},
+                         {entry['path'] for entry in plan['operations']})
         self.assertEqual(plan['fingerprint'],
                          re.search(r'\.fingerprint = (0x[0-9a-f]+)', contents(request)['build.zig.zon'].decode()).group(1))
         self.assertEqual(plan['resolvedAddons'], ['design_tokens', 'memory_store'])

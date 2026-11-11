@@ -121,7 +121,8 @@ export function planProject(project: ProjectInput, catalog: Catalog): Plan {
   const files: FileOperation[] = [
     { kind: "render", path: "build.zig" }, { kind: "render", path: "build.zig.zon" },
     { kind: "render", path: "zevui.zon" }, { kind: "render", path: "README.md" },
-    { kind: "render", path: ".gitignore" }, { kind: "render", path: "src/main.zig" },
+    { kind: "render", path: ".gitignore" }, { kind: "render", path: "mise.toml" },
+    { kind: "render", path: "src/main.zig" },
     { kind: "copy", path: "zevui/build.zig", source: "templates/compat/zevui/build.zig" },
     { kind: "copy", path: "zevui/config.zig", source: "templates/compat/zevui/config.zig" },
   ];
