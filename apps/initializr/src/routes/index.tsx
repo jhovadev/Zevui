@@ -140,6 +140,7 @@ export default function Home() {
         <span class="brand-word">zevui<span class="brand-muted">/initializr</span></span>
       </a>
       <nav class="top-nav" aria-label="Enlaces de proyecto">
+        <a href="/components">Components <Icon name="arrow" size={14}/></a>
         <a href="https://github.com/david-vanderson/dvui" target="_blank" rel="noopener noreferrer">DVUI <Icon name="arrow" size={14}/></a>
         <a href="https://github.com/jhovadev/zigdataengine" target="_blank" rel="noopener noreferrer">ZData <Icon name="arrow" size={14}/></a>
         <span class="pill top-version">Zig {catalog()?.zig ?? "0.17.1"}</span>
@@ -156,6 +157,7 @@ export default function Home() {
           <span><Icon name="check" size={15}/> Native UI</span>
           <span><Icon name="check" size={15}/> Addons modulares</span>
         </div>
+        <a class="hero-components-link" href="/components">Explore Zevui Components <Icon name="arrow" size={15}/></a>
       </section>
 
       <div class="workspace">

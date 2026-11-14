@@ -121,7 +121,7 @@ pub fn build(b: *std.Build) void {
     // itself does not impose a renderer/SDL or duplicate a DVUI module instance.
 
     const test_step = b.step("test", "Test Zevui's framework (without CSV/ZData)");
-    inline for (.{ "src/config.zig", "src/ui/tokens.zig", "src/ui/hooks.zig", "src/storage.zig" }) |source| {
+    inline for (.{ "src/config.zig", "src/ui/tokens.zig", "src/ui/hooks.zig", "src/ui/heatmap_model.zig", "src/ui/calendar_model.zig", "src/storage.zig" }) |source| {
         const test_artifact = b.addTest(.{ .root_module = b.createModule(.{
             .root_source_file = b.path(source), .target = target, .optimize = optimize,
         }) });

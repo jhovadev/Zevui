@@ -111,3 +111,8 @@ button:focus-visible,input:focus-visible,a:focus-visible { outline:2px solid #bc
 .plan-details small { color: #9e99ae; font-size: 11px; }
 .share-project { width: 100%; margin: 3px 0 12px; padding: 11px; border-radius: 9px; border: 1px solid #474254; background: #211e2b; color: #ddd5f3; cursor: pointer; }
 .share-project:focus-visible, .plan-details summary:focus-visible { outline: 2px solid #c3a9ff; outline-offset: 3px; }
+
+/* Zevui Components: discoverable even when the compact header hides nav links. */
+.hero-components-link { display:inline-flex; align-items:center; gap:8px; margin-top:26px; padding:10px 15px; border:1px solid #63527d; border-radius:8px; color:#dccbff; background:#211b31; font-size:12px; font-weight:650; }
+.hero-components-link:hover { background:#342743; border-color:#af91ed; }
+@media(max-width:520px) { .components-app .top-nav a { display:flex; } .components-app .top-nav a[aria-current="page"], .components-app .top-version { display:none; } }

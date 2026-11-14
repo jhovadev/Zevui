@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "id": "progress",
+  "name": "Progress",
+  "category": "Feedback",
+  "description": "A compact determinate progress indicator with themed track and fill.",
+  "status": "experimental",
+  "zig": "0.17.1",
+  "renderer": "DVUI",
+  "files": [
+    {"source": "framework/src/ui/progress.zig", "target": "src/components/progress.zig"}
+  ],
+  "usage": "const progress = @import(\"components/progress.zig\");\nprogress.draw(@src(), completed, total, .{});"
+}

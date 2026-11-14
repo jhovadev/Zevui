@@ -1,0 +1,8 @@
+.{
+    .name = .zevui_cli,
+    // Stable package identity. Do not regenerate on each build.
+    .fingerprint = 0x7f2308bf74581cb1,
+    .version = "0.2.0",
+    .minimum_zig_version = "0.17.1",
+    .paths = .{ "build.zig", "build.zig.zon", "src", "registry.json", "registry-bundle.json", "README.md", "LICENSE", "SKILL.md" },
+}

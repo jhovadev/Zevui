@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "id": "input",
+  "name": "Text Input",
+  "category": "Inputs",
+  "description": "Single-line, multiline and password input using native DVUI text entry and caller-owned buffers.",
+  "status": "experimental",
+  "zig": "0.17.1",
+  "renderer": "DVUI",
+  "files": [
+    {
+      "source": "framework/src/ui/input.zig",
+      "target": "src/components/input.zig"
+    }
+  ],
+  "usage": "const input = @import(\"components/input.zig\");\nvar name = [_]u8{0} ** 128; // persist across frames\n_ = input.draw(@src(), &name, .{ .label = \"Name\", .placeholder = \"Your name\" });"
+}

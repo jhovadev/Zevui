@@ -264,3 +264,40 @@ a separate release configuration.
 Run `just registry-manifests-check` and `just addons-check` before publishing. **Standalone remote package hashes are not yet available**; the Initializr preserves its verified source-copy bridge until F5.
 
 For F5 starter template authoring and acceptance, see [F5 templates](docs/architecture/f5-real-templates.md).
+
+## Zevui Components (source-owned DVUI)
+
+The component gallery is available at **`/components`** alongside Initializr.
+It offers documented, searchable demos of native DVUI components, real Zig
+source for copying, theme/density controls and an opt-in installer that does
+not overwrite user-modified files. Web previews are illustrative HTML, not
+native DVUI/WASM; the shipped desktop app stays Zig + DVUI.
+
+```sh
+just initializr             # / and /components on port 8765
+just components-check       # manifest, source snapshot and safety tests
+just component-add heatmap /path/to/generated-app
+```
+
+See [Zevui Components documentation](docs/components.md).
+
+
+### Zevui Components F9 — source-owned native library
+
+The `/components` catalog alongside Initializr now includes **eight** DVUI
+components: Action, Activity Heatmap, Progress, Design Tokens, Calendar, Text
+Input, Checkbox Field and Separator. The new `packages/zevui-cli` implements
+`init`, `list`, `add`, `update`, `doctor` and `diff` **in Zig 0.17.1**. Optional
+npm/Bun entry points launch Zig; they do not run a JavaScript installer. The
+shadcn-shaped registry and immutable offline Zig source bundle are derived from
+`registry/components/` and protected by SHA-256 checks.
+
+```sh
+just components-check
+just components-cli-check
+zig run packages/zevui-cli/src/main.zig -O ReleaseSafe -- list
+```
+
+See [the component contract](docs/components.md) and
+[the agent skill](skills/zevui-components/SKILL.md). The npm package is
+**not yet published**, and native compilation must be tested with Zig 0.17.1.

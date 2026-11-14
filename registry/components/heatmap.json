@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "id": "heatmap",
+  "name": "Activity Heatmap",
+  "category": "Data visualization",
+  "description": "A week-aligned activity calendar with five semantic intensity levels and per-day tooltip.",
+  "status": "experimental",
+  "zig": "0.17.1",
+  "renderer": "DVUI",
+  "files": [
+    {"source": "framework/src/ui/heatmap.zig", "target": "src/components/heatmap.zig"},
+    {"source": "framework/src/ui/heatmap_model.zig", "target": "src/components/heatmap_model.zig"}
+  ],
+  "usage": "const heatmap = @import(\"components/heatmap.zig\");\nheatmap.draw(@src(), activity[0..], .{ .cell_size = 12, .gap = 3 });"
+}

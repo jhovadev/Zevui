@@ -242,3 +242,53 @@ set positional-arguments := true
 @sqlite-portability-gui:
     just zig-preflight
     python3 scripts/sqlite_portability_smoke.py --gui
+
+# Source-owned DVUI component gallery, separate from the addon registry.
+@components:
+    @echo "Zevui Components: http://127.0.0.1:8765/components"
+    cd apps/initializr && bun run dev
+
+@components-check:
+    python3 tools/components.py verify
+    python3 -m unittest tests.test_components_registry tests.test_components_f9 tests.test_components_f93 -v
+    node packages/zevui-cli/scripts/build-registry.mjs --check
+
+# Install native component source into an already-generated Zig project.
+@component-add component project:
+    python3 tools/components.py add "$1" --project "$2"
+
+@component-status component project:
+    python3 tools/components.py status "$1" --project "$2"
+
+@component-update component project:
+    python3 tools/components.py update "$1" --project "$2"
+
+# F9 native CLI: Node is used only to verify/regenerate distribution snapshots.
+# All `zevui` CLI behavior is implemented in Zig 0.17.1.
+@components-cli-check:
+    just zig-preflight
+    node packages/zevui-cli/scripts/build-registry.mjs --check
+    cd packages/zevui-cli && zig build test -Doptimize=ReleaseSafe
+    cd packages/zevui-cli && zig build -Doptimize=ReleaseSafe
+
+# End-to-end smoke with an isolated minimal Zig project (no DVUI runtime needed).
+# Verifies init/add/doctor/diff, checksums, and refusal to replace edited files.
+@components-cli-smoke:
+    just components-cli-check
+    python3 scripts/components_cli_smoke.py --cli packages/zevui-cli/zig-out/bin/zevui
+
+@components-cli-list:
+    just zig-preflight
+    zig run packages/zevui-cli/src/main.zig -O ReleaseSafe -- list
+
+@components-cli-init project:
+    just zig-preflight
+    zig run packages/zevui-cli/src/main.zig -O ReleaseSafe -- init --project "$1"
+
+@components-cli-add project component:
+    just zig-preflight
+    zig run packages/zevui-cli/src/main.zig -O ReleaseSafe -- add --project "$1" "$2"
+
+@components-cli-doctor project:
+    just zig-preflight
+    zig run packages/zevui-cli/src/main.zig -O ReleaseSafe -- doctor --project "$1"

@@ -1,0 +1,139 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "zevui",
+  "homepage": "https://zevui-initializr.vercel.app/components",
+  "items": [
+    {
+      "name": "action",
+      "title": "Action Button",
+      "description": "Semantic DVUI actions with primary, secondary and selected variants, plus an icon fallback.",
+      "type": "registry:ui",
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "framework/src/ui/components.zig",
+          "type": "registry:ui",
+          "target": "src/components/action/components.zig"
+        },
+        {
+          "path": "framework/src/ui/dvui_style.zig",
+          "type": "registry:ui",
+          "target": "src/components/action/dvui_style.zig"
+        },
+        {
+          "path": "framework/src/ui/tokens.zig",
+          "type": "registry:ui",
+          "target": "src/components/action/tokens.zig"
+        }
+      ]
+    },
+    {
+      "name": "calendar",
+      "title": "Calendar",
+      "description": "Native month navigation and single-date selection; Gregorian rules tested without DVUI.",
+      "type": "registry:ui",
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "framework/src/ui/calendar.zig",
+          "type": "registry:ui",
+          "target": "src/components/calendar.zig"
+        },
+        {
+          "path": "framework/src/ui/calendar_model.zig",
+          "type": "registry:ui",
+          "target": "src/components/calendar_model.zig"
+        }
+      ]
+    },
+    {
+      "name": "checkbox",
+      "title": "Checkbox Field",
+      "description": "Native checkbox with description and caller-owned boolean state.",
+      "type": "registry:ui",
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "framework/src/ui/checkbox_field.zig",
+          "type": "registry:ui",
+          "target": "src/components/checkbox_field.zig"
+        }
+      ]
+    },
+    {
+      "name": "heatmap",
+      "title": "Activity Heatmap",
+      "description": "A week-aligned activity calendar with five semantic intensity levels and per-day tooltip.",
+      "type": "registry:ui",
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "framework/src/ui/heatmap.zig",
+          "type": "registry:ui",
+          "target": "src/components/heatmap.zig"
+        },
+        {
+          "path": "framework/src/ui/heatmap_model.zig",
+          "type": "registry:ui",
+          "target": "src/components/heatmap_model.zig"
+        }
+      ]
+    },
+    {
+      "name": "input",
+      "title": "Text Input",
+      "description": "Single-line, multiline and password input using native DVUI text entry and caller-owned buffers.",
+      "type": "registry:ui",
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "framework/src/ui/input.zig",
+          "type": "registry:ui",
+          "target": "src/components/input.zig"
+        }
+      ]
+    },
+    {
+      "name": "progress",
+      "title": "Progress",
+      "description": "A compact determinate progress indicator with themed track and fill.",
+      "type": "registry:ui",
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "framework/src/ui/progress.zig",
+          "type": "registry:ui",
+          "target": "src/components/progress.zig"
+        }
+      ]
+    },
+    {
+      "name": "separator",
+      "title": "Separator",
+      "description": "Lightweight horizontal or vertical DVUI separator with configurable thickness and color.",
+      "type": "registry:ui",
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "framework/src/ui/separator.zig",
+          "type": "registry:ui",
+          "target": "src/components/separator.zig"
+        }
+      ]
+    },
+    {
+      "name": "tokens",
+      "title": "Design Tokens",
+      "description": "Pure Zig semantic colors, modes, accents and density: renderer independent.",
+      "type": "registry:ui",
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "framework/src/ui/tokens.zig",
+          "type": "registry:ui",
+          "target": "src/components/tokens.zig"
+        }
+      ]
+    }
+  ]
+}

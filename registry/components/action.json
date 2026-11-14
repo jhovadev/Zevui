@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "id": "action",
+  "name": "Action Button",
+  "category": "Inputs",
+  "description": "Semantic DVUI actions with primary, secondary and selected variants, plus an icon fallback.",
+  "status": "stable",
+  "zig": "0.17.1",
+  "renderer": "DVUI",
+  "files": [
+    {"source": "framework/src/ui/components.zig", "target": "src/components/action/components.zig"},
+    {"source": "framework/src/ui/dvui_style.zig", "target": "src/components/action/dvui_style.zig"},
+    {"source": "framework/src/ui/tokens.zig", "target": "src/components/action/tokens.zig"}
+  ],
+  "usage": "const ui = @import(\"components/action/components.zig\");\nconst style = @import(\"components/action/dvui_style.zig\");\nconst p = style.palette(.{});\nif (ui.action(@src(), \"Save\", .primary, p)) { /* handle click */ }"
+}

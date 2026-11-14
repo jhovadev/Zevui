@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "id": "separator",
+  "name": "Separator",
+  "category": "Layout",
+  "description": "Lightweight horizontal or vertical DVUI separator with configurable thickness and color.",
+  "status": "stable",
+  "zig": "0.17.1",
+  "renderer": "DVUI",
+  "files": [
+    {
+      "source": "framework/src/ui/separator.zig",
+      "target": "src/components/separator.zig"
+    }
+  ],
+  "usage": "const separator = @import(\"components/separator.zig\");\nseparator.draw(@src(), .{ .length = 240, .thickness = 1 });"
+}

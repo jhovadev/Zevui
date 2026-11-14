@@ -8,7 +8,7 @@ export default createHandler(() => (
           <meta charset="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <meta name="theme-color" content="#0b0b12" />
-          <title>Zevui Initializr — Start native</title>
+          <title>Zevui — Initializr &amp; Components</title>
           <link rel="icon" type="image/svg+xml" href="/zevui.svg" />
           {assets}
         </head>

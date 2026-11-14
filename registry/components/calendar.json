@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "id": "calendar",
+  "name": "Calendar",
+  "category": "Inputs",
+  "description": "Native month navigation and single-date selection; Gregorian rules tested without DVUI.",
+  "status": "experimental",
+  "zig": "0.17.1",
+  "renderer": "DVUI",
+  "files": [
+    {
+      "source": "framework/src/ui/calendar.zig",
+      "target": "src/components/calendar.zig"
+    },
+    {
+      "source": "framework/src/ui/calendar_model.zig",
+      "target": "src/components/calendar_model.zig"
+    }
+  ],
+  "usage": "const calendar = @import(\"components/calendar.zig\");\n// Initialize `state` once, outside frame():\n// state = calendar.State.init(.{ .year = 2026, .month = 11, .day = 14 });\n_ = calendar.draw(@src(), &state, .{});"
+}

@@ -12,4 +12,12 @@ pub const ui = struct {
     pub const style = @import("ui/dvui_style.zig");
     pub const components = @import("ui/components.zig");
     pub const icons = @import("ui/icons.zig");
+    pub const heatmap = @import("ui/heatmap.zig");
+    pub const heatmap_model = @import("ui/heatmap_model.zig");
+    pub const progress = @import("ui/progress.zig");
+    pub const calendar_model = @import("ui/calendar_model.zig");
+    pub const calendar = @import("ui/calendar.zig");
+    pub const input = @import("ui/input.zig");
+    pub const checkbox_field = @import("ui/checkbox_field.zig");
+    pub const separator = @import("ui/separator.zig");
 };

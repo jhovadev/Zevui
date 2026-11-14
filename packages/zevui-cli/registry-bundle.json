@@ -1,0 +1,243 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "zevui",
+  "homepage": "https://zevui-initializr.vercel.app/components",
+  "items": [
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "action",
+      "type": "registry:ui",
+      "title": "Action Button",
+      "description": "Semantic DVUI actions with primary, secondary and selected variants, plus an icon fallback.",
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "framework/src/ui/components.zig",
+          "type": "registry:ui",
+          "target": "src/components/action/components.zig",
+          "content": "//! Small semantic components. Callers pass @src() so immediate-mode IDs are\n//! attached to the CALL SITE (do not reuse one ID for all buttons).\nconst std = @import(\"std\");\nconst dvui = @import(\"dvui\");\nconst style = @import(\"dvui_style.zig\");\n\npub const Variant = enum { primary, secondary, selected };\n\npub fn action(comptime caller: std.builtin.SourceLocation, label: []const u8, variant: Variant, p: style.Palette) bool {\n    const selected = variant == .selected;\n    return dvui.button(caller, label, .{}, .{\n        .background = true,\n        .color_fill = switch (variant) {\n            .primary => p.accent,\n            .secondary => p.elevated,\n            .selected => p.accent_soft,\n        },\n        .color_text = if (variant == .primary) p.on_accent else p.text,\n        .color_border = if (selected) p.accent else p.border,\n        .border = if (selected) .all(2) else .all(1),\n        .corners = .round(9),\n        .padding = .all(8),\n        .gravity_y = 0.5,\n    });\n}\n\n/// Accessible vector icon action (TinyVG converted from editable SVG source).\n/// Falls back to a text button if this DVUI build disables vector graphics.\npub fn iconAction(\n    comptime caller: std.builtin.SourceLocation,\n    label: []const u8,\n    tvg_bytes: ?[]const u8,\n    variant: Variant,\n    p: style.Palette,\n) bool {\n    if (tvg_bytes) |bytes| {\n        return dvui.buttonIcon(caller, label, bytes, .{}, .{\n            .fill_color = if (variant == .primary) p.on_accent else p.text,\n            .stroke_color = if (variant == .primary) p.on_accent else p.text,\n        }, .{\n            .background = true,\n            .color_fill = if (variant == .primary) p.accent else p.elevated,\n            .color_border = p.border,\n            .border = .all(1),\n            .corners = .round(8),\n            .padding = .all(7),\n            .label = .{ .text = label },\n            .gravity_y = 0.5,\n        });\n    }\n    return action(caller, label, variant, p);\n}\n",
+          "sha256": "263e851097b04f37c9c571575af4475d211ab5e0406f81ffc42c428c05be7e31"
+        },
+        {
+          "path": "framework/src/ui/dvui_style.zig",
+          "type": "registry:ui",
+          "target": "src/components/action/dvui_style.zig",
+          "content": "//! DVUI-specific adapter. The tokens module stays usable in headless tests.\nconst dvui = @import(\"dvui\");\nconst t = @import(\"tokens.zig\");\npub const Appearance = t.Appearance;\npub const Spacing = t.Spacing;\npub const Palette = struct {\n    canvas: dvui.ColorOrGradient,\n    surface: dvui.ColorOrGradient,\n    elevated: dvui.ColorOrGradient,\n    header: dvui.ColorOrGradient,\n    row_alt: dvui.ColorOrGradient,\n    border: dvui.ColorOrGradient,\n    text: dvui.ColorOrGradient,\n    muted: dvui.ColorOrGradient,\n    accent: dvui.ColorOrGradient,\n    accent_soft: dvui.ColorOrGradient,\n    accent_text: dvui.ColorOrGradient,\n    on_accent: dvui.ColorOrGradient,\n    positive: dvui.ColorOrGradient,\n    negative: dvui.ColorOrGradient,\n    warning: dvui.ColorOrGradient,\n};\nfn toDvui(c: t.Color) dvui.ColorOrGradient {\n    return .{ .color = .{ .r = c.r, .g = c.g, .b = c.b } };\n}\npub fn palette(a: Appearance) Palette {\n    const p = t.palette(a);\n    return .{\n        .canvas = toDvui(p.canvas), .surface = toDvui(p.surface),\n        .elevated = toDvui(p.elevated), .header = toDvui(p.header),\n        .row_alt = toDvui(p.row_alt), .border = toDvui(p.border),\n        .text = toDvui(p.text), .muted = toDvui(p.muted),\n        .accent = toDvui(p.accent), .accent_soft = toDvui(p.accent_soft),\n        .accent_text = toDvui(p.accent_text),\n        .on_accent = toDvui(p.on_accent), .positive = toDvui(p.positive),\n        .negative = toDvui(p.negative), .warning = toDvui(p.warning),\n    };\n}\npub fn accents(mode: t.Mode) [5]dvui.ColorOrGradient {\n    return .{ toDvui(t.accentColor(mode, .lavender)), toDvui(t.accentColor(mode, .coral)),\n        toDvui(t.accentColor(mode, .mint)), toDvui(t.accentColor(mode, .sky)),\n        toDvui(t.accentColor(mode, .amber)) };\n}\npub fn spacing(density: t.Density) Spacing { return t.spacing(density); }\npub fn themeFor(mode: t.Mode) dvui.Theme {\n    return switch (mode) {\n        .light => dvui.Theme.builtin.adwaita_light,\n        .graphite, .contrast => dvui.Theme.builtin.adwaita_dark,\n    };\n}\n",
+          "sha256": "13b81bb1d180479acbb842757755372680dc2ad5e7cc9115ba73b13c2da7c088"
+        },
+        {
+          "path": "framework/src/ui/tokens.zig",
+          "type": "registry:ui",
+          "target": "src/components/action/tokens.zig",
+          "content": "//! UI design tokens are pure Zig: no DVUI, SDL, OS or ZData dependency.\n//! All colors are opaque sRGB. Consumers translate them to backend colors.\nconst std = @import(\"std\");\n\npub const Color = struct { r: u8, g: u8, b: u8 };\npub const Mode = enum { graphite, light, contrast };\npub const Density = enum { comfortable, compact };\npub const Accent = enum { lavender, coral, mint, sky, amber };\n\npub const Appearance = struct {\n    mode: Mode = .graphite,\n    density: Density = .compact,\n    accent: Accent = .lavender,\n\n    pub fn cycleMode(self: *Appearance) void {\n        self.mode = switch (self.mode) { .graphite => .light, .light => .contrast, .contrast => .graphite };\n    }\n    pub fn cycleAccent(self: *Appearance) void {\n        self.accent = switch (self.accent) {\n            .lavender => .coral, .coral => .mint, .mint => .sky, .sky => .amber, .amber => .lavender,\n        };\n    }\n    pub fn toggleDensity(self: *Appearance) void {\n        self.density = switch (self.density) { .comfortable => .compact, .compact => .comfortable };\n    }\n};\n\npub fn modeName(mode: Mode) []const u8 {\n    return switch (mode) { .graphite => \"Graphite\", .light => \"Light\", .contrast => \"Contrast\" };\n}\npub fn accentName(accent: Accent) []const u8 {\n    return switch (accent) { .lavender => \"Lavanda\", .coral => \"Coral\", .mint => \"Menta\", .sky => \"Azul\", .amber => \"Ambar\" };\n}\n\npub const Palette = struct {\n    canvas: Color,\n    surface: Color,\n    elevated: Color,\n    header: Color,\n    row_alt: Color,\n    border: Color,\n    text: Color,\n    muted: Color,\n    accent: Color,\n    accent_soft: Color,\n    accent_text: Color,\n    on_accent: Color,\n    /// Semantic colors are intentionally distinct from the selected brand accent.\n    positive: Color,\n    negative: Color,\n    warning: Color,\n};\n\npub fn accentColor(mode: Mode, accent: Accent) Color {\n    if (mode == .contrast) return switch (accent) {\n        .lavender => .{ .r = 220, .g = 205, .b = 255 },\n        .coral => .{ .r = 255, .g = 195, .b = 195 },\n        .mint => .{ .r = 158, .g = 255, .b = 224 },\n        .sky => .{ .r = 158, .g = 220, .b = 255 },\n        .amber => .{ .r = 255, .g = 226, .b = 152 },\n    };\n    return switch (accent) {\n        .lavender => .{ .r = 191, .g = 179, .b = 255 },\n        .coral => .{ .r = 255, .g = 163, .b = 171 },\n        .mint => .{ .r = 131, .g = 222, .b = 199 },\n        .sky => .{ .r = 143, .g = 203, .b = 241 },\n        .amber => .{ .r = 243, .g = 194, .b = 142 },\n    };\n}\n\n/// Darker emphasis colors for text on the light surface (not pastel fills).\npub fn accentInk(accent: Accent) Color {\n    return switch (accent) {\n        .lavender => .{ .r = 89, .g = 53, .b = 154 },\n        .coral => .{ .r = 146, .g = 41, .b = 62 },\n        .mint => .{ .r = 9, .g = 102, .b = 76 },\n        .sky => .{ .r = 23, .g = 84, .b = 143 },\n        .amber => .{ .r = 124, .g = 77, .b = 18 },\n    };\n}\n\n/// Alpha-blend a selected accent into a base surface (fixed-point, 0..256).\nfn mix(base: Color, tint: Color, comptime tint_weight: u16) Color {\n    const base_weight: u16 = 256 - tint_weight;\n    return .{\n        .r = @intCast((@as(u16, base.r) * base_weight + @as(u16, tint.r) * tint_weight) / 256),\n        .g = @intCast((@as(u16, base.g) * base_weight + @as(u16, tint.g) * tint_weight) / 256),\n        .b = @intCast((@as(u16, base.b) * base_weight + @as(u16, tint.b) * tint_weight) / 256),\n    };\n}\n\npub fn palette(appearance: Appearance) Palette {\n    const selected = accentColor(appearance.mode, appearance.accent);\n    return switch (appearance.mode) {\n        .graphite => .{\n            .canvas = .{ .r = 17, .g = 17, .b = 19 },\n            .surface = .{ .r = 25, .g = 25, .b = 28 },\n            .elevated = .{ .r = 32, .g = 32, .b = 36 },\n            .header = .{ .r = 37, .g = 37, .b = 42 },\n            .row_alt = .{ .r = 29, .g = 29, .b = 33 },\n            .border = .{ .r = 67, .g = 67, .b = 76 },\n            .text = .{ .r = 239, .g = 239, .b = 244 },\n            .muted = .{ .r = 174, .g = 174, .b = 186 },\n            .accent = selected,\n            .accent_soft = mix(.{ .r = 32, .g = 32, .b = 36 }, selected, 48),\n            .accent_text = selected,\n            .on_accent = .{ .r = 17, .g = 17, .b = 19 },\n            .positive = accentColor(.graphite, .mint),\n            .negative = accentColor(.graphite, .coral),\n            .warning = accentColor(.graphite, .amber),\n        },\n        .light => .{\n            .canvas = .{ .r = 247, .g = 248, .b = 251 },\n            .surface = .{ .r = 255, .g = 255, .b = 255 },\n            .elevated = .{ .r = 239, .g = 240, .b = 245 },\n            .header = .{ .r = 231, .g = 233, .b = 240 },\n            .row_alt = .{ .r = 249, .g = 250, .b = 253 },\n            .border = .{ .r = 201, .g = 205, .b = 216 },\n            .text = .{ .r = 32, .g = 34, .b = 43 },\n            .muted = .{ .r = 90, .g = 95, .b = 111 },\n            .accent = selected,\n            .accent_soft = mix(.{ .r = 255, .g = 255, .b = 255 }, selected, 76),\n            .accent_text = accentInk(appearance.accent),\n            .on_accent = .{ .r = 17, .g = 17, .b = 19 },\n            .positive = .{ .r = 16, .g = 111, .b = 81 },\n            .negative = .{ .r = 176, .g = 45, .b = 63 },\n            .warning = .{ .r = 142, .g = 86, .b = 23 },\n        },\n        .contrast => .{\n            .canvas = .{ .r = 0, .g = 0, .b = 0 },\n            .surface = .{ .r = 6, .g = 6, .b = 6 },\n            .elevated = .{ .r = 25, .g = 25, .b = 25 },\n            .header = .{ .r = 34, .g = 34, .b = 34 },\n            .row_alt = .{ .r = 15, .g = 15, .b = 15 },\n            .border = .{ .r = 211, .g = 211, .b = 211 },\n            .text = .{ .r = 255, .g = 255, .b = 255 },\n            .muted = .{ .r = 230, .g = 230, .b = 230 },\n            .accent = selected,\n            .accent_soft = mix(.{ .r = 25, .g = 25, .b = 25 }, selected, 64),\n            .accent_text = selected,\n            .on_accent = .{ .r = 0, .g = 0, .b = 0 },\n            .positive = accentColor(.contrast, .mint),\n            .negative = accentColor(.contrast, .coral),\n            .warning = accentColor(.contrast, .amber),\n        },\n    };\n}\n\npub const Spacing = struct { xs: f32, sm: f32, md: f32, lg: f32, xl: f32, cell_x: f32, cell_y: f32 };\npub fn spacing(density: Density) Spacing {\n    return switch (density) {\n        .comfortable => .{ .xs = 4, .sm = 8, .md = 12, .lg = 16, .xl = 24, .cell_x = 11, .cell_y = 7 },\n        .compact => .{ .xs = 3, .sm = 6, .md = 9, .lg = 12, .xl = 18, .cell_x = 8, .cell_y = 4 },\n    };\n}\n\nfn srgb(v: u8) f64 {\n    const n: f64 = @as(f64, @floatFromInt(v)) / 255.0;\n    return if (n <= 0.04045) n / 12.92 else std.math.pow(f64, (n + 0.055) / 1.055, 2.4);\n}\nfn luminance(c: Color) f64 { return 0.2126 * srgb(c.r) + 0.7152 * srgb(c.g) + 0.0722 * srgb(c.b); }\npub fn contrastRatio(a: Color, b: Color) f64 {\n    const la = luminance(a);\n    const lb = luminance(b);\n    return (@max(la, lb) + 0.05) / (@min(la, lb) + 0.05);\n}\n\ntest \"multitheme tokens are internally contrasting\" {\n    for ([_]Mode{ .graphite, .light, .contrast }) |mode| {\n        for ([_]Accent{ .lavender, .coral, .mint, .sky, .amber }) |accent| {\n            const p = palette(.{ .mode = mode, .accent = accent });\n            try std.testing.expect(contrastRatio(p.canvas, p.text) >= 7.0);\n            try std.testing.expect(contrastRatio(p.surface, p.muted) >= 4.5);\n            try std.testing.expect(contrastRatio(p.accent, p.on_accent) >= 4.5);\n            try std.testing.expect(contrastRatio(p.surface, p.accent_text) >= 4.5);\n        }\n    }\n}\ntest \"state transitions and densities\" {\n    var a: Appearance = .{};\n    a.cycleMode();\n    try std.testing.expectEqual(Mode.light, a.mode);\n    a.cycleMode();\n    a.cycleMode();\n    try std.testing.expectEqual(Mode.graphite, a.mode);\n    a.cycleAccent();\n    try std.testing.expectEqual(Accent.coral, a.accent);\n    a.toggleDensity();\n    try std.testing.expectEqual(Density.comfortable, a.density);\n    a.toggleDensity();\n    try std.testing.expectEqual(Density.compact, a.density);\n    try std.testing.expect(spacing(.compact).cell_y < spacing(.comfortable).cell_y);\n}\n",
+          "sha256": "39ec9a216aaa05d1e566a4661866ff637afca6c6c98f919c511d7f6393e6108a"
+        }
+      ],
+      "meta": {
+        "zevui": {
+          "schema": 1,
+          "zig": "0.17.1",
+          "renderer": "DVUI",
+          "status": "stable",
+          "category": "Inputs"
+        }
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "calendar",
+      "type": "registry:ui",
+      "title": "Calendar",
+      "description": "Native month navigation and single-date selection; Gregorian rules tested without DVUI.",
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "framework/src/ui/calendar.zig",
+          "type": "registry:ui",
+          "target": "src/components/calendar.zig",
+          "content": "//! Source-owned single-date calendar for DVUI. The caller owns the state.\nconst std = @import(\"std\");\nconst dvui = @import(\"dvui\");\nconst model = @import(\"calendar_model.zig\");\npub const Date = model.Date;\npub const State = struct {\n    visible: model.Month,\n    selected: ?Date = null,\n    pub fn init(today: Date) State {\n        return .{ .visible = .{ .year = today.year, .month = today.month }, .selected = if (today.valid()) today else null };\n    }\n};\npub const Options = struct { disabled_before: ?Date = null, disabled_after: ?Date = null };\nfn ordinal(d: Date) u32 { return @as(u32, d.year) * 10000 + @as(u32, d.month) * 100 + d.day; }\nfn enabled(date: Date, opts: Options) bool {\n    return (opts.disabled_before == null or ordinal(date) >= ordinal(opts.disabled_before.?)) and\n        (opts.disabled_after == null or ordinal(date) <= ordinal(opts.disabled_after.?));\n}\n/// Returns true if selected date changed. No implicit clock/timezone conversion.\npub fn draw(src: std.builtin.SourceLocation, state: *State, opts: Options) bool {\n    var changed = false;\n    var root = dvui.box(src, .{ .dir = .vertical }, .{});\n    defer root.deinit();\n    {\n        var header = dvui.box(@src(), .{ .dir = .horizontal }, .{});\n        defer header.deinit();\n        if (dvui.button(@src(), \"<\", .{}, .{})) {\n            if (model.shift(state.visible, -1)) |next| state.visible = next;\n        }\n        if (state.visible.month >= 1 and state.visible.month <= 12) {\n            dvui.label(@src(), \"{s} {d}\", .{ model.month_names[state.visible.month - 1], state.visible.year }, .{ .font = .theme(.heading) });\n        }\n        if (dvui.button(@src(), \">\", .{}, .{})) {\n            if (model.shift(state.visible, 1)) |next| state.visible = next;\n        }\n    }\n    {\n        var week = dvui.box(@src(), .{ .dir = .horizontal }, .{});\n        defer week.deinit();\n        for (model.day_names, 0..) |name, i| {\n            dvui.label(@src(), \"{s}\", .{name}, .{ .id_extra = i, .min_size_content = .width(31) });\n        }\n    }\n    for (0..6) |row| {\n        var week = dvui.box(@src(), .{ .dir = .horizontal }, .{ .id_extra = row });\n        defer week.deinit();\n        for (0..7) |col| {\n            const date = model.cell(state.visible, row * 7 + col);\n            if (date) |d| {\n                var buffer: [3]u8 = undefined;\n                const day_label = std.fmt.bufPrint(&buffer, \"{d}\", .{d.day}) catch unreachable;\n                if (enabled(d, opts)) {\n                    const is_selected = if (state.selected) |s| ordinal(s) == ordinal(d) else false;\n                    if (dvui.button(@src(), day_label, .{}, .{ .id_extra = col, .min_size_content = .width(31), .color_fill = if (is_selected) .{ .color = .{ .r = 191, .g = 179, .b = 255 } } else .{ .color = .{ .r = 43, .g = 45, .b = 55 } } })) {\n                        state.selected = d;\n                        changed = true;\n                    }\n                } else dvui.label(@src(), \"{s}\", .{day_label}, .{ .id_extra = col, .min_size_content = .width(31) });\n            } else {\n                dvui.label(@src(), \" \", .{}, .{ .id_extra = col, .min_size_content = .width(31) });\n            }\n        }\n    }\n    return changed;\n}\n",
+          "sha256": "b259a1f7fb5974167412b6d37400dd9a1347772910a4703b21bd8ef533560022"
+        },
+        {
+          "path": "framework/src/ui/calendar_model.zig",
+          "type": "registry:ui",
+          "target": "src/components/calendar_model.zig",
+          "content": "//! Pure Gregorian calendar: no DVUI, locale, timezone or allocator dependency.\nconst std = @import(\"std\");\n\npub const Date = struct {\n    year: u16,\n    month: u8,\n    day: u8,\n\n    pub fn valid(self: Date) bool {\n        return self.year >= 1 and self.year <= 9999 and self.month >= 1 and self.month <= 12 and\n            self.day >= 1 and self.day <= daysInMonth(self.year, self.month);\n    }\n};\n\npub const Month = struct { year: u16, month: u8 };\n\npub fn leap(year: u16) bool {\n    return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0);\n}\n\npub fn daysInMonth(year: u16, month: u8) u8 {\n    if (year < 1 or year > 9999) return 0;\n    return switch (month) {\n        1, 3, 5, 7, 8, 10, 12 => 31,\n        4, 6, 9, 11 => 30,\n        2 => if (leap(year)) 29 else 28,\n        else => 0,\n    };\n}\n\n/// Monday=0..Sunday=6, null for invalid dates. Sakamoto's algorithm.\npub fn weekday(date: Date) ?u3 {\n    if (!date.valid()) return null;\n    const offsets = [_]u8{ 0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4 };\n    const y: u32 = @as(u32, date.year) - @as(u32, if (date.month < 3) @as(u32, 1) else 0);\n    const sunday0 = (y + y / 4 - y / 100 + y / 400 + offsets[date.month - 1] + date.day) % 7;\n    return @intCast((sunday0 + 6) % 7);\n}\n\n/// Grid position 0 is Monday on the first visible week. null means padding.\npub fn cell(month: Month, index: usize) ?Date {\n    if (index >= 42) return null;\n    const offset = weekday(.{ .year = month.year, .month = month.month, .day = 1 }) orelse return null;\n    if (index < offset) return null;\n    const day = index - offset + 1;\n    if (day > daysInMonth(month.year, month.month)) return null;\n    return .{ .year = month.year, .month = month.month, .day = @intCast(day) };\n}\n\npub fn shift(month: Month, delta: i8) ?Month {\n    if (month.year < 1 or month.year > 9999 or month.month < 1 or month.month > 12) return null;\n    const ordinal = (@as(i32, month.year) - 1) * 12 + @as(i32, month.month) - 1 + @as(i32, delta);\n    if (ordinal < 0 or ordinal >= 9999 * 12) return null;\n    return .{ .year = @intCast(@divTrunc(ordinal, 12) + 1), .month = @intCast(@mod(ordinal, 12) + 1) };\n}\n\npub const month_names = [_][]const u8{ \"January\", \"February\", \"March\", \"April\", \"May\", \"June\", \"July\", \"August\", \"September\", \"October\", \"November\", \"December\" };\npub const day_names = [_][]const u8{ \"Mo\", \"Tu\", \"We\", \"Th\", \"Fr\", \"Sa\", \"Su\" };\n\ntest \"Gregorian leap rules and invalid boundaries\" {\n    try std.testing.expect(leap(2000));\n    try std.testing.expect(!leap(1900));\n    try std.testing.expect(leap(2024));\n    try std.testing.expectEqual(@as(u8, 29), daysInMonth(2024, 2));\n    try std.testing.expectEqual(@as(u8, 28), daysInMonth(2026, 2));\n    try std.testing.expect(!(Date{ .year = 2026, .month = 2, .day = 29 }).valid());\n    try std.testing.expect(!(Date{ .year = 0, .month = 1, .day = 1 }).valid());\n    try std.testing.expect(!(Date{ .year = 2026, .month = 13, .day = 1 }).valid());\n}\n\ntest \"weekday grid anchored on monday\" {\n    try std.testing.expectEqual(@as(?u3, 0), weekday(.{ .year = 2024, .month = 1, .day = 1 }));\n    try std.testing.expectEqual(@as(?u3, 5), weekday(.{ .year = 2026, .month = 11, .day = 14 }));\n    try std.testing.expectEqual(@as(?Date, null), cell(.{ .year = 2026, .month = 11 }, 0));\n    try std.testing.expectEqual(@as(u8, 1), cell(.{ .year = 2026, .month = 11 }, 6).?.day);\n    try std.testing.expectEqual(@as(u8, 30), cell(.{ .year = 2026, .month = 11 }, 35).?.day);\n    try std.testing.expectEqual(@as(?Date, null), cell(.{ .year = 2026, .month = 11 }, 36));\n}\n\ntest \"year transitions and limits\" {\n    try std.testing.expectEqual(Month{ .year = 2027, .month = 1 }, shift(.{ .year = 2026, .month = 12 }, 1).?);\n    try std.testing.expectEqual(Month{ .year = 2025, .month = 12 }, shift(.{ .year = 2026, .month = 1 }, -1).?);\n    try std.testing.expectEqual(@as(?Month, null), shift(.{ .year = 1, .month = 1 }, -1));\n    try std.testing.expectEqual(@as(?Month, null), shift(.{ .year = 9999, .month = 12 }, 1));\n}\n",
+          "sha256": "de14cec5ae8cf7b3ed427c9f6c8edceb72e7480d5dae79abad0276656381d834"
+        }
+      ],
+      "meta": {
+        "zevui": {
+          "schema": 1,
+          "zig": "0.17.1",
+          "renderer": "DVUI",
+          "status": "experimental",
+          "category": "Inputs"
+        }
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "checkbox",
+      "type": "registry:ui",
+      "title": "Checkbox Field",
+      "description": "Native checkbox with description and caller-owned boolean state.",
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "framework/src/ui/checkbox_field.zig",
+          "type": "registry:ui",
+          "target": "src/components/checkbox_field.zig",
+          "content": "//! Reusable DVUI checkbox with optional secondary description.\nconst std = @import(\"std\");\nconst dvui = @import(\"dvui\");\npub fn draw(src: std.builtin.SourceLocation, checked: *bool, title: []const u8, description: ?[]const u8) bool {\n    var column = dvui.box(src, .{ .dir = .vertical }, .{});\n    defer column.deinit();\n    const changed = dvui.checkbox(@src(), checked, title, .{});\n    if (description) |detail| dvui.label(@src(), \"{s}\", .{detail}, .{ .font = .theme(.body) });\n    return changed;\n}\n",
+          "sha256": "e8e0bab20d1831d2598eefcd2fedf2c147b71f2ce58bd577df7121ba484c58f0"
+        }
+      ],
+      "meta": {
+        "zevui": {
+          "schema": 1,
+          "zig": "0.17.1",
+          "renderer": "DVUI",
+          "status": "stable",
+          "category": "Inputs"
+        }
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "heatmap",
+      "type": "registry:ui",
+      "title": "Activity Heatmap",
+      "description": "A week-aligned activity calendar with five semantic intensity levels and per-day tooltip.",
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "framework/src/ui/heatmap.zig",
+          "type": "registry:ui",
+          "target": "src/components/heatmap.zig",
+          "content": "//! Zevui activity heatmap for DVUI with Zig 0.17.1. Copy this file together with\n//! heatmap_model.zig into src/components for a source-owned component.\nconst std = @import(\"std\");\nconst dvui = @import(\"dvui\");\nconst model = @import(\"heatmap_model.zig\");\n\npub const Options = struct {\n    cell_size: f32 = 12,\n    gap: f32 = 3,\n    /// Accessible contrast alternatives can be supplied by the consumer.\n    palette: [5]dvui.ColorOrGradient = .{\n        .{ .color = .{ .r = 43, .g = 45, .b = 55 } },\n        .{ .color = .{ .r = 16, .g = 82, .b = 63 } },\n        .{ .color = .{ .r = 28, .g = 129, .b = 94 } },\n        .{ .color = .{ .r = 44, .g = 176, .b = 120 } },\n        .{ .color = .{ .r = 94, .g = 224, .b = 164 } },\n    },\n};\n\n/// Column-major order: each consecutive group of seven values is one week.\n/// Start on Monday; fill missing calendar days with zero before calling draw.\n/// Widget IDs derive from caller, week and weekday for stable immediate-mode IDs.\npub fn draw(src: std.builtin.SourceLocation, counts: []const u32, opts: Options) void {\n    if (!model.validWeeks(counts)) {\n        dvui.label(src, \"Heatmap requires complete weeks (7 days each)\", .{}, .{});\n        return;\n    }\n\n    const max = model.maximum(counts);\n    var row = dvui.box(src, .{ .dir = .horizontal }, .{\n        .background = false,\n        .padding = .all(0),\n    });\n    defer row.deinit();\n\n    for (0..counts.len / model.days_per_week) |week| {\n        var column = dvui.box(@src(), .{ .dir = .vertical }, .{\n            .id_extra = week,\n            .background = false,\n            .padding = .all(0),\n            .margin = .{ .w = opts.gap },\n        });\n        defer column.deinit();\n\n        for (0..model.days_per_week) |weekday| {\n            const index = week * model.days_per_week + weekday;\n            const value = counts[index];\n            const shade: usize = model.intensity(value, max);\n            var cell = dvui.box(@src(), .{}, .{\n                .id_extra = weekday,\n                .background = true,\n                .min_size_content = .{ .w = opts.cell_size, .h = opts.cell_size },\n                .margin = .{ .h = opts.gap },\n                .padding = .all(0),\n                .border = .all(0),\n                .corners = .round(2),\n                .color_fill = opts.palette[shade],\n            });\n            const rect = cell.data().borderRectScale().r;\n            if (rect.intersect(dvui.clipGet()).contains(dvui.currentWindow().mouse_pt)) {\n                dvui.tooltip(@src(), .{ .active_rect = rect, .delay = 150_000 },\n                    \"Day {d}: {d} activities\", .{ index + 1, value }, .{ .id_extra = index });\n            }\n            cell.deinit();\n        }\n    }\n}\n",
+          "sha256": "fbaebd8a8e1ca0be47ec37a1e565ef2233ebef5636b91fe4ef47f9a58808bfd4"
+        },
+        {
+          "path": "framework/src/ui/heatmap_model.zig",
+          "type": "registry:ui",
+          "target": "src/components/heatmap_model.zig",
+          "content": "//! Renderer-independent activity heatmap math. This is intentionally pure Zig.\nconst std = @import(\"std\");\n\npub const days_per_week: usize = 7;\npub const levels: usize = 5;\n\n/// Zero is always empty; nonzero values are distributed over levels 1..4.\n/// The u64 intermediate prevents overflow for large u32 activity counts.\npub fn intensity(value: u32, max_value: u32) u3 {\n    if (value == 0 or max_value == 0) return 0;\n    const numerator = @as(u64, value) * 4 + @as(u64, max_value) - 1;\n    const scaled = numerator / @as(u64, max_value);\n    return @intCast(@min(scaled, 4));\n}\n\npub fn maximum(counts: []const u32) u32 {\n    var result: u32 = 0;\n    for (counts) |count| result = @max(result, count);\n    return result;\n}\n\npub fn total(counts: []const u32) u64 {\n    var result: u64 = 0;\n    for (counts) |count| result += count;\n    return result;\n}\n\npub fn validWeeks(counts: []const u32) bool {\n    return counts.len > 0 and counts.len % days_per_week == 0;\n}\n\npub fn at(counts: []const u32, week: usize, weekday: usize) ?u32 {\n    if (weekday >= days_per_week) return null;\n    if (week >= counts.len / days_per_week) return null;\n    return counts[week * days_per_week + weekday];\n}\n\ntest \"empty and low activity\" {\n    try std.testing.expectEqual(@as(u3, 0), intensity(0, 100));\n    try std.testing.expectEqual(@as(u3, 0), intensity(8, 0));\n    try std.testing.expectEqual(@as(u3, 1), intensity(1, 100));\n    try std.testing.expectEqual(@as(u3, 2), intensity(26, 100));\n    try std.testing.expectEqual(@as(u3, 4), intensity(100, 100));\n}\n\ntest \"large values never overflow\" {\n    const max = std.math.maxInt(u32);\n    try std.testing.expectEqual(@as(u3, 4), intensity(max, max));\n    try std.testing.expectEqual(@as(u3, 1), intensity(1, max));\n}\n\ntest \"week alignment and aggregates\" {\n    const values = [_]u32{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };\n    try std.testing.expect(validWeeks(&values));\n    try std.testing.expect(!validWeeks(values[0..13]));\n    try std.testing.expectEqual(@as(u32, 13), maximum(&values));\n    try std.testing.expectEqual(@as(u64, 91), total(&values));\n    try std.testing.expectEqual(@as(?u32, 7), at(&values, 1, 0));\n    try std.testing.expectEqual(@as(?u32, null), at(&values, 2, 0));\n    try std.testing.expectEqual(@as(?u32, null), at(&values, 0, 7));\n}\n",
+          "sha256": "0e280e0cd2f9dd25e6b1b38ea003ea4ad3d1a4c4077aa00d8632d17e71fb3908"
+        }
+      ],
+      "meta": {
+        "zevui": {
+          "schema": 1,
+          "zig": "0.17.1",
+          "renderer": "DVUI",
+          "status": "experimental",
+          "category": "Data visualization"
+        }
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "input",
+      "type": "registry:ui",
+      "title": "Text Input",
+      "description": "Single-line, multiline and password input using native DVUI text entry and caller-owned buffers.",
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "framework/src/ui/input.zig",
+          "type": "registry:ui",
+          "target": "src/components/input.zig",
+          "content": "//! Native editable text and password field; external zero-terminated buffer owns data.\nconst std = @import(\"std\");\nconst dvui = @import(\"dvui\");\npub const Options = struct {\n    label: []const u8,\n    placeholder: []const u8 = \"\",\n    password: bool = false,\n    multiline: bool = false,\n    width: f32 = 220,\n};\n/// `buffer` is a writable, NUL-terminated fixed-size byte slice managed by caller.\n/// Returns true on edit. For variable-length text, use DVUI's buffer_dynamic API.\npub fn draw(src: std.builtin.SourceLocation, buffer: []u8, opts: Options) bool {\n    var column = dvui.box(src, .{ .dir = .vertical }, .{});\n    defer column.deinit();\n    dvui.label(@src(), \"{s}\", .{opts.label}, .{});\n    var entry = dvui.textEntry(@src(), .{\n        .text = .{ .buffer = buffer },\n        .placeholder = opts.placeholder,\n        .password_char = if (opts.password) \"*\" else null,\n        .multiline = opts.multiline,\n    }, .{ .min_size_content = .width(opts.width) });\n    const edited = entry.text_changed;\n    entry.deinit();\n    return edited;\n}\n",
+          "sha256": "f350f10b6e5bf7764fbcefc8563ac515823550114ed8de0618bda52b9f3a5a01"
+        }
+      ],
+      "meta": {
+        "zevui": {
+          "schema": 1,
+          "zig": "0.17.1",
+          "renderer": "DVUI",
+          "status": "experimental",
+          "category": "Inputs"
+        }
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "progress",
+      "type": "registry:ui",
+      "title": "Progress",
+      "description": "A compact determinate progress indicator with themed track and fill.",
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "framework/src/ui/progress.zig",
+          "type": "registry:ui",
+          "target": "src/components/progress.zig",
+          "content": "//! Source-owned native DVUI progress bar. No browser or state framework.\nconst std = @import(\"std\");\nconst dvui = @import(\"dvui\");\n\npub const Options = struct {\n    width: f32 = 200,\n    height: f32 = 9,\n    track: dvui.ColorOrGradient = .{ .color = .{ .r = 60, .g = 61, .b = 70 } },\n    fill: dvui.ColorOrGradient = .{ .color = .{ .r = 191, .g = 179, .b = 255 } },\n};\n\n/// The caller owns progress state; value is clamped to maximum.\n/// Use @src() at each distinct call site.\npub fn draw(src: std.builtin.SourceLocation, value: u64, maximum: u64, opts: Options) void {\n    const fraction: f32 = if (maximum == 0) 0 else\n        @floatCast(@as(f64, @floatFromInt(@min(value, maximum))) /\n            @as(f64, @floatFromInt(maximum)));\n    var track = dvui.box(src, .{ .dir = .horizontal }, .{\n        .background = true,\n        .min_size_content = .{ .w = opts.width, .h = opts.height },\n        .color_fill = opts.track,\n        .padding = .all(0),\n        .corners = .round(4),\n    });\n    defer track.deinit();\n    if (fraction > 0) {\n        var fill = dvui.box(@src(), .{}, .{\n            .background = true,\n            .min_size_content = .{ .w = opts.width * fraction, .h = opts.height },\n            .color_fill = opts.fill,\n            .padding = .all(0),\n            .corners = .round(4),\n        });\n        fill.deinit();\n    }\n}\n",
+          "sha256": "393e091df3bb06d7e62432238d9040333d7595cdab1b21c8ba4306c0c5a5f80d"
+        }
+      ],
+      "meta": {
+        "zevui": {
+          "schema": 1,
+          "zig": "0.17.1",
+          "renderer": "DVUI",
+          "status": "experimental",
+          "category": "Feedback"
+        }
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "separator",
+      "type": "registry:ui",
+      "title": "Separator",
+      "description": "Lightweight horizontal or vertical DVUI separator with configurable thickness and color.",
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "framework/src/ui/separator.zig",
+          "type": "registry:ui",
+          "target": "src/components/separator.zig",
+          "content": "//! Minimal semantic divider using DVUI layout primitives.\nconst std = @import(\"std\");\nconst dvui = @import(\"dvui\");\npub const Direction = enum { horizontal, vertical };\npub const Options = struct {\n    direction: Direction = .horizontal,\n    length: f32 = 200,\n    thickness: f32 = 1,\n    color: dvui.ColorOrGradient = .{ .color = .{ .r = 90, .g = 87, .b = 101 } },\n};\npub fn draw(src: std.builtin.SourceLocation, opts: Options) void {\n    var bar = dvui.box(src, .{}, .{\n        .background = true,\n        .color_fill = opts.color,\n        .padding = .all(0),\n        .border = .all(0),\n        .min_size_content = if (opts.direction == .horizontal)\n            .{ .w = opts.length, .h = opts.thickness }\n        else\n            .{ .w = opts.thickness, .h = opts.length },\n    });\n    bar.deinit();\n}\n",
+          "sha256": "cd8b6102a3d8509583f0e794c0650d014406228745ff593d25e29dbdcc63cd98"
+        }
+      ],
+      "meta": {
+        "zevui": {
+          "schema": 1,
+          "zig": "0.17.1",
+          "renderer": "DVUI",
+          "status": "stable",
+          "category": "Layout"
+        }
+      }
+    },
+    {
+      "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+      "name": "tokens",
+      "type": "registry:ui",
+      "title": "Design Tokens",
+      "description": "Pure Zig semantic colors, modes, accents and density: renderer independent.",
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "framework/src/ui/tokens.zig",
+          "type": "registry:ui",
+          "target": "src/components/tokens.zig",
+          "content": "//! UI design tokens are pure Zig: no DVUI, SDL, OS or ZData dependency.\n//! All colors are opaque sRGB. Consumers translate them to backend colors.\nconst std = @import(\"std\");\n\npub const Color = struct { r: u8, g: u8, b: u8 };\npub const Mode = enum { graphite, light, contrast };\npub const Density = enum { comfortable, compact };\npub const Accent = enum { lavender, coral, mint, sky, amber };\n\npub const Appearance = struct {\n    mode: Mode = .graphite,\n    density: Density = .compact,\n    accent: Accent = .lavender,\n\n    pub fn cycleMode(self: *Appearance) void {\n        self.mode = switch (self.mode) { .graphite => .light, .light => .contrast, .contrast => .graphite };\n    }\n    pub fn cycleAccent(self: *Appearance) void {\n        self.accent = switch (self.accent) {\n            .lavender => .coral, .coral => .mint, .mint => .sky, .sky => .amber, .amber => .lavender,\n        };\n    }\n    pub fn toggleDensity(self: *Appearance) void {\n        self.density = switch (self.density) { .comfortable => .compact, .compact => .comfortable };\n    }\n};\n\npub fn modeName(mode: Mode) []const u8 {\n    return switch (mode) { .graphite => \"Graphite\", .light => \"Light\", .contrast => \"Contrast\" };\n}\npub fn accentName(accent: Accent) []const u8 {\n    return switch (accent) { .lavender => \"Lavanda\", .coral => \"Coral\", .mint => \"Menta\", .sky => \"Azul\", .amber => \"Ambar\" };\n}\n\npub const Palette = struct {\n    canvas: Color,\n    surface: Color,\n    elevated: Color,\n    header: Color,\n    row_alt: Color,\n    border: Color,\n    text: Color,\n    muted: Color,\n    accent: Color,\n    accent_soft: Color,\n    accent_text: Color,\n    on_accent: Color,\n    /// Semantic colors are intentionally distinct from the selected brand accent.\n    positive: Color,\n    negative: Color,\n    warning: Color,\n};\n\npub fn accentColor(mode: Mode, accent: Accent) Color {\n    if (mode == .contrast) return switch (accent) {\n        .lavender => .{ .r = 220, .g = 205, .b = 255 },\n        .coral => .{ .r = 255, .g = 195, .b = 195 },\n        .mint => .{ .r = 158, .g = 255, .b = 224 },\n        .sky => .{ .r = 158, .g = 220, .b = 255 },\n        .amber => .{ .r = 255, .g = 226, .b = 152 },\n    };\n    return switch (accent) {\n        .lavender => .{ .r = 191, .g = 179, .b = 255 },\n        .coral => .{ .r = 255, .g = 163, .b = 171 },\n        .mint => .{ .r = 131, .g = 222, .b = 199 },\n        .sky => .{ .r = 143, .g = 203, .b = 241 },\n        .amber => .{ .r = 243, .g = 194, .b = 142 },\n    };\n}\n\n/// Darker emphasis colors for text on the light surface (not pastel fills).\npub fn accentInk(accent: Accent) Color {\n    return switch (accent) {\n        .lavender => .{ .r = 89, .g = 53, .b = 154 },\n        .coral => .{ .r = 146, .g = 41, .b = 62 },\n        .mint => .{ .r = 9, .g = 102, .b = 76 },\n        .sky => .{ .r = 23, .g = 84, .b = 143 },\n        .amber => .{ .r = 124, .g = 77, .b = 18 },\n    };\n}\n\n/// Alpha-blend a selected accent into a base surface (fixed-point, 0..256).\nfn mix(base: Color, tint: Color, comptime tint_weight: u16) Color {\n    const base_weight: u16 = 256 - tint_weight;\n    return .{\n        .r = @intCast((@as(u16, base.r) * base_weight + @as(u16, tint.r) * tint_weight) / 256),\n        .g = @intCast((@as(u16, base.g) * base_weight + @as(u16, tint.g) * tint_weight) / 256),\n        .b = @intCast((@as(u16, base.b) * base_weight + @as(u16, tint.b) * tint_weight) / 256),\n    };\n}\n\npub fn palette(appearance: Appearance) Palette {\n    const selected = accentColor(appearance.mode, appearance.accent);\n    return switch (appearance.mode) {\n        .graphite => .{\n            .canvas = .{ .r = 17, .g = 17, .b = 19 },\n            .surface = .{ .r = 25, .g = 25, .b = 28 },\n            .elevated = .{ .r = 32, .g = 32, .b = 36 },\n            .header = .{ .r = 37, .g = 37, .b = 42 },\n            .row_alt = .{ .r = 29, .g = 29, .b = 33 },\n            .border = .{ .r = 67, .g = 67, .b = 76 },\n            .text = .{ .r = 239, .g = 239, .b = 244 },\n            .muted = .{ .r = 174, .g = 174, .b = 186 },\n            .accent = selected,\n            .accent_soft = mix(.{ .r = 32, .g = 32, .b = 36 }, selected, 48),\n            .accent_text = selected,\n            .on_accent = .{ .r = 17, .g = 17, .b = 19 },\n            .positive = accentColor(.graphite, .mint),\n            .negative = accentColor(.graphite, .coral),\n            .warning = accentColor(.graphite, .amber),\n        },\n        .light => .{\n            .canvas = .{ .r = 247, .g = 248, .b = 251 },\n            .surface = .{ .r = 255, .g = 255, .b = 255 },\n            .elevated = .{ .r = 239, .g = 240, .b = 245 },\n            .header = .{ .r = 231, .g = 233, .b = 240 },\n            .row_alt = .{ .r = 249, .g = 250, .b = 253 },\n            .border = .{ .r = 201, .g = 205, .b = 216 },\n            .text = .{ .r = 32, .g = 34, .b = 43 },\n            .muted = .{ .r = 90, .g = 95, .b = 111 },\n            .accent = selected,\n            .accent_soft = mix(.{ .r = 255, .g = 255, .b = 255 }, selected, 76),\n            .accent_text = accentInk(appearance.accent),\n            .on_accent = .{ .r = 17, .g = 17, .b = 19 },\n            .positive = .{ .r = 16, .g = 111, .b = 81 },\n            .negative = .{ .r = 176, .g = 45, .b = 63 },\n            .warning = .{ .r = 142, .g = 86, .b = 23 },\n        },\n        .contrast => .{\n            .canvas = .{ .r = 0, .g = 0, .b = 0 },\n            .surface = .{ .r = 6, .g = 6, .b = 6 },\n            .elevated = .{ .r = 25, .g = 25, .b = 25 },\n            .header = .{ .r = 34, .g = 34, .b = 34 },\n            .row_alt = .{ .r = 15, .g = 15, .b = 15 },\n            .border = .{ .r = 211, .g = 211, .b = 211 },\n            .text = .{ .r = 255, .g = 255, .b = 255 },\n            .muted = .{ .r = 230, .g = 230, .b = 230 },\n            .accent = selected,\n            .accent_soft = mix(.{ .r = 25, .g = 25, .b = 25 }, selected, 64),\n            .accent_text = selected,\n            .on_accent = .{ .r = 0, .g = 0, .b = 0 },\n            .positive = accentColor(.contrast, .mint),\n            .negative = accentColor(.contrast, .coral),\n            .warning = accentColor(.contrast, .amber),\n        },\n    };\n}\n\npub const Spacing = struct { xs: f32, sm: f32, md: f32, lg: f32, xl: f32, cell_x: f32, cell_y: f32 };\npub fn spacing(density: Density) Spacing {\n    return switch (density) {\n        .comfortable => .{ .xs = 4, .sm = 8, .md = 12, .lg = 16, .xl = 24, .cell_x = 11, .cell_y = 7 },\n        .compact => .{ .xs = 3, .sm = 6, .md = 9, .lg = 12, .xl = 18, .cell_x = 8, .cell_y = 4 },\n    };\n}\n\nfn srgb(v: u8) f64 {\n    const n: f64 = @as(f64, @floatFromInt(v)) / 255.0;\n    return if (n <= 0.04045) n / 12.92 else std.math.pow(f64, (n + 0.055) / 1.055, 2.4);\n}\nfn luminance(c: Color) f64 { return 0.2126 * srgb(c.r) + 0.7152 * srgb(c.g) + 0.0722 * srgb(c.b); }\npub fn contrastRatio(a: Color, b: Color) f64 {\n    const la = luminance(a);\n    const lb = luminance(b);\n    return (@max(la, lb) + 0.05) / (@min(la, lb) + 0.05);\n}\n\ntest \"multitheme tokens are internally contrasting\" {\n    for ([_]Mode{ .graphite, .light, .contrast }) |mode| {\n        for ([_]Accent{ .lavender, .coral, .mint, .sky, .amber }) |accent| {\n            const p = palette(.{ .mode = mode, .accent = accent });\n            try std.testing.expect(contrastRatio(p.canvas, p.text) >= 7.0);\n            try std.testing.expect(contrastRatio(p.surface, p.muted) >= 4.5);\n            try std.testing.expect(contrastRatio(p.accent, p.on_accent) >= 4.5);\n            try std.testing.expect(contrastRatio(p.surface, p.accent_text) >= 4.5);\n        }\n    }\n}\ntest \"state transitions and densities\" {\n    var a: Appearance = .{};\n    a.cycleMode();\n    try std.testing.expectEqual(Mode.light, a.mode);\n    a.cycleMode();\n    a.cycleMode();\n    try std.testing.expectEqual(Mode.graphite, a.mode);\n    a.cycleAccent();\n    try std.testing.expectEqual(Accent.coral, a.accent);\n    a.toggleDensity();\n    try std.testing.expectEqual(Density.comfortable, a.density);\n    a.toggleDensity();\n    try std.testing.expectEqual(Density.compact, a.density);\n    try std.testing.expect(spacing(.compact).cell_y < spacing(.comfortable).cell_y);\n}\n",
+          "sha256": "39ec9a216aaa05d1e566a4661866ff637afca6c6c98f919c511d7f6393e6108a"
+        }
+      ],
+      "meta": {
+        "zevui": {
+          "schema": 1,
+          "zig": "0.17.1",
+          "renderer": "Zig",
+          "status": "stable",
+          "category": "Foundation"
+        }
+      }
+    }
+  ]
+}

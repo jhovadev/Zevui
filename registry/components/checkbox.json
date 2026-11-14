@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "id": "checkbox",
+  "name": "Checkbox Field",
+  "category": "Inputs",
+  "description": "Native checkbox with description and caller-owned boolean state.",
+  "status": "stable",
+  "zig": "0.17.1",
+  "renderer": "DVUI",
+  "files": [
+    {
+      "source": "framework/src/ui/checkbox_field.zig",
+      "target": "src/components/checkbox_field.zig"
+    }
+  ],
+  "usage": "const field = @import(\"components/checkbox_field.zig\");\nvar enabled = false; // persist across frames\n_ = field.draw(@src(), &enabled, \"Notifications\", \"Receive updates\");"
+}
